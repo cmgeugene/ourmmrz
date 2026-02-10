@@ -87,56 +87,82 @@ export default function AddEventScreen() {
     };
 
     return (
-        <View className="flex-1 bg-white">
-            <Stack.Screen options={{ title: 'Add Memory', headerBackTitle: 'Cancel' }} />
-            <ScrollView className="p-4">
+        <View className="flex-1 bg-surface">
+            {/* Custom Header */}
+            <Stack.Screen options={{ headerShown: false }} />
+            <View className="px-5 pt-14 pb-4 flex-row justify-between items-center bg-white z-10">
+                <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+                    <Ionicons name="close" size={28} color="#1E293B" />
+                </TouchableOpacity>
+                <Text className="text-xl font-bold text-gray-900 font-sans">New Memory</Text>
+                <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting || !image} className={`${isSubmitting || !image ? 'opacity-50' : 'opacity-100'}`}>
+                    <Text className="text-primary font-bold text-base font-sans">Save</Text>
+                </TouchableOpacity>
+            </View>
 
+            <ScrollView className="flex-1 px-5 pt-4" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                 {/* Image Picker */}
                 <TouchableOpacity
                     onPress={pickImage}
-                    className="w-full h-64 bg-gray-100 rounded-lg justify-center items-center mb-6 overflow-hidden border border-gray-200"
+                    className="w-full aspect-[4/3] bg-white rounded-3xl justify-center items-center mb-6 overflow-hidden shadow-sm border border-gray-100"
                 >
                     {image ? (
                         <Image source={{ uri: image }} className="w-full h-full" resizeMode="cover" />
                     ) : (
                         <View className="items-center">
-                            <Ionicons name="camera" size={40} color="gray" />
-                            <Text className="text-gray-500 mt-2">Tap to select photo</Text>
+                            <View className="w-16 h-16 bg-blue-50 rounded-full justify-center items-center mb-4">
+                                <Ionicons name="image-outline" size={32} color="#3B82F6" />
+                            </View>
+                            <Text className="text-gray-900 font-bold font-sans text-lg mb-1">Add Photo</Text>
+                            <Text className="text-gray-400 font-sans text-sm">Tap to select from gallery</Text>
                         </View>
                     )}
                 </TouchableOpacity>
 
-                {/* Date Picker */}
-                <View className="mb-6">
-                    <Text className="text-gray-600 mb-2 font-medium">Date</Text>
+                {/* Date Picker Section */}
+                <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                    <View className="flex-row items-center justify-between mb-2">
+                        <View className="flex-row items-center">
+                            <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                                <Ionicons name="calendar-outline" size={18} color="#3B82F6" />
+                            </View>
+                            <Text className="text-gray-900 font-bold font-sans text-base">Date</Text>
+                        </View>
+                    </View>
+
                     {Platform.OS === 'android' && (
                         <TouchableOpacity
                             onPress={() => setShowDatePicker(true)}
-                            className="bg-gray-50 p-3 rounded-lg border border-gray-200"
+                            className="bg-gray-50 p-3 rounded-xl mt-2"
                         >
-                            <Text>{date.toLocaleDateString()}</Text>
+                            <Text className="font-sans text-gray-900 text-base">{date.toLocaleDateString()}</Text>
                         </TouchableOpacity>
                     )}
 
                     {(showDatePicker || Platform.OS === 'ios') && (
-                        <DateTimePicker
-                            testID="dateTimePicker"
-                            value={date}
-                            mode="date"
-                            is24Hour={true}
-                            display="default"
-                            onChange={onChangeDate}
-                            style={Platform.OS === 'ios' ? { alignSelf: 'flex-start' } : {}}
-                        />
+                        <View className="mt-2 items-start">
+                            <DateTimePicker
+                                testID="dateTimePicker"
+                                value={date}
+                                mode="date"
+                                is24Hour={true}
+                                display={Platform.OS === 'ios' ? 'spinner' : 'default'} // Spinner usually looks better inline on modern iOS for this specific layout, or 'inline' if available/supported
+                                onChange={onChangeDate}
+                                style={Platform.OS === 'ios' ? { alignSelf: 'flex-start' } : {}}
+                                themeVariant="light"
+                                accentColor="#3B82F6"
+                            />
+                        </View>
                     )}
                 </View>
 
                 {/* Description Input */}
                 <View className="mb-8">
-                    <Text className="text-gray-600 mb-2 font-medium">Description</Text>
+                    <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Caption</Text>
                     <TextInput
-                        className="bg-gray-50 p-4 rounded-lg border border-gray-200 h-32"
-                        placeholder="Write about this memory..."
+                        className="bg-white p-5 rounded-2xl border border-gray-50 shadow-sm h-40 font-sans text-gray-900 text-base leading-relaxed"
+                        placeholder="Write something about this moment..."
+                        placeholderTextColor="#9CA3AF"
                         multiline
                         textAlignVertical="top"
                         value={description}
@@ -144,20 +170,7 @@ export default function AddEventScreen() {
                     />
                 </View>
 
-                {/* Submit Button */}
-                <TouchableOpacity
-                    onPress={handleSubmit}
-                    disabled={isSubmitting}
-                    className={`py-4 rounded-full items-center ${isSubmitting ? 'bg-gray-300' : 'bg-primary'}`}
-                    style={{ backgroundColor: isSubmitting ? '#ccc' : '#f4256a' }} // Tailwind color fallback
-                >
-                    {isSubmitting ? (
-                        <Text className="text-white font-bold text-lg">Saving...</Text>
-                    ) : (
-                        <Text className="text-white font-bold text-lg">Save Memory</Text>
-                    )}
-                </TouchableOpacity>
-
+                <View className="h-20" />
             </ScrollView>
         </View>
     );

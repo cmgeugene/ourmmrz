@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
+import { useFonts, PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJakartaSans_700Bold } from '@expo-google-fonts/plus-jakarta-sans';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -46,18 +46,22 @@ function useProtectedRoute() {
 
 function RootLayoutNav() {
     const colorScheme = useColorScheme();
-    const loaded = true; // Font loading removed due to missing file
+    const [loaded, error] = useFonts({
+        PlusJakartaSans_400Regular,
+        PlusJakartaSans_500Medium,
+        PlusJakartaSans_700Bold,
+    });
 
     useProtectedRoute();
 
     useEffect(() => {
-        if (loaded) {
-            console.log('RootLayout: Hiding splash screen');
+        if (loaded || error) {
+            console.log('RootLayout: Fonts loaded (or error), hiding splash screen');
             SplashScreen.hideAsync();
         }
-    }, [loaded]);
+    }, [loaded, error]);
 
-    if (!loaded) {
+    if (!loaded && !error) {
         return null;
     }
 

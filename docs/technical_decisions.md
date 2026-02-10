@@ -31,5 +31,5 @@ Stitch 디자인 `12309556307585584052`을 기반으로 하는 Android/iOS/Web �
 ## 6. 디렉토리 구조
 - `app/`: Expo Router 라우트 및 글로벌 스타일
 - `components/`: 공통 UI 컴포넌트
-- `constants/`: 색상(#f4256a), 테마 등 상수값
+- `constants/`: 색상(Blue/White), 테마 등 상수값
 - `docs/`: 프로젝트 문서화 폴더
