@@ -72,5 +72,36 @@ export const EventService = {
     getImageUrl: (path: string) => {
         const { data } = supabase.storage.from('memories').getPublicUrl(path);
         return data.publicUrl;
+    },
+
+    deleteEvent: async (id: string, imagePath: string | null) => {
+        // 1. Delete from DB
+        const { error: dbError } = await supabase
+            .from('timeline_events')
+            .delete()
+            .eq('id', id);
+
+        if (dbError) throw dbError;
+
+        // 2. Delete from Storage if path exists
+        if (imagePath) {
+            const { error: storageError } = await supabase.storage
+                .from('memories')
+                .remove([imagePath]);
+
+            if (storageError) {
+                console.error('Error deleting image from storage:', storageError);
+                throw storageError; // Re-throw to alert the user
+            }
+        }
+    },
+
+    updateEvent: async (id: string, params: import('../types').UpdateEventParams) => {
+        const { error } = await supabase
+            .from('timeline_events')
+            .update(params)
+            .eq('id', id);
+
+        if (error) throw error;
     }
 };

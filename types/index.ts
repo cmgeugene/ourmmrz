@@ -15,3 +15,8 @@ export interface CreateEventParams {
     description?: string;
     event_date: string;
 }
+
+export interface UpdateEventParams {
+    description?: string;
+    event_date?: string;
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, Image, RefreshControl, ActivityIndicator, TouchableOpacity, Dimensions } from 'react-native';
-import { Link, useFocusEffect } from 'expo-router';
+import { View, Text, FlatList, Image, RefreshControl, ActivityIndicator, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { useAuth } from '../../components/ctx/AuthContext';
 import { EventService } from '../../services/eventService';
 import { TimelineEvent } from '../../types';
@@ -10,7 +10,8 @@ import { format } from 'date-fns';
 const { width } = Dimensions.get('window');
 
 export default function TimelineScreen() {
-    const { coupleId } = useAuth();
+    const { coupleId, user } = useAuth();
+    const router = useRouter();
     const [events, setEvents] = useState<TimelineEvent[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -53,17 +54,78 @@ export default function TimelineScreen() {
         loadEvents();
     };
 
+    const handleDelete = async (event: TimelineEvent) => {
+        Alert.alert(
+            "Delete Memory",
+            "Are you sure you want to delete this memory? This action cannot be undone.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            setLoading(true);
+                            await EventService.deleteEvent(event.id, event.image_path);
+                            // Refresh events
+                            loadEvents();
+                        } catch (error) {
+                            console.error(error);
+                            Alert.alert("Error", "Failed to delete memory.");
+                            setLoading(false); // Restore loading state if error
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleMorePress = (item: TimelineEvent) => {
+        Alert.alert(
+            "Manage Memory",
+            "Choose an action",
+            [
+                {
+                    text: "Edit",
+                    onPress: () => {
+                        router.push({
+                            pathname: '/edit-event',
+                            params: {
+                                id: item.id,
+                                description: item.description || '',
+                                event_date: item.event_date,
+                                image_path: item.image_path || ''
+                            }
+                        });
+                    }
+                },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => handleDelete(item)
+                },
+                { text: "Cancel", style: "cancel" }
+            ]
+        );
+    };
+
     const renderItem = ({ item }: { item: TimelineEvent }) => {
         const imageUrl = item.image_path ? EventService.getImageUrl(item.image_path) : null;
 
         return (
             <View className="mb-8">
                 {/* Date Header */}
-                <View className="px-4 mb-2 flex-row items-center">
-                    <View className="w-2 h-2 rounded-full bg-primary mr-2" style={{ backgroundColor: '#f4256a' }} />
-                    <Text className="text-gray-500 font-medium">
-                        {format(new Date(item.event_date), 'MMMM d, yyyy')}
-                    </Text>
+                <View className="px-4 mb-2 flex-row justify-between items-center">
+                    <View className="flex-row items-center">
+                        <View className="w-2 h-2 rounded-full bg-primary mr-2" style={{ backgroundColor: '#f4256a' }} />
+                        <Text className="text-gray-500 font-medium">
+                            {format(new Date(item.event_date), 'MMMM d, yyyy')}
+                        </Text>
+                    </View>
+
+                    <TouchableOpacity onPress={() => handleMorePress(item)} className="p-2">
+                        <Ionicons name="ellipsis-horizontal" size={20} color="#999" />
+                    </TouchableOpacity>
                 </View>
 
                 {/* Image Card */}
@@ -99,11 +161,15 @@ export default function TimelineScreen() {
             {/* Header */}
             <View className="pt-14 pb-4 px-4 bg-white flex-row justify-between items-center shadow-sm z-10">
                 <Text className="text-2xl font-bold text-gray-900">Our Memories</Text>
-                <Link href="/(tabs)/add" asChild>
-                    <TouchableOpacity className="bg-gray-100 p-2 rounded-full">
-                        <Ionicons name="add" size={24} color="#f4256a" />
-                    </TouchableOpacity>
-                </Link>
+                <TouchableOpacity
+                    className="bg-gray-100 p-2 rounded-full"
+                    onPress={() => router.push({
+                        pathname: '/(tabs)/add',
+                        params: { refresh: Date.now().toString() }
+                    })}
+                >
+                    <Ionicons name="add" size={24} color="#f4256a" />
+                </TouchableOpacity>
             </View>
 
             {events.length === 0 ? (

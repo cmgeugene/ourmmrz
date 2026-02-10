@@ -36,8 +36,8 @@ function useProtectedRoute() {
             }
         } else if (session && coupleId) {
             // Signed in and couple connected
-            // Redirect to tabs if not already there
-            if (segments[0] !== '(tabs)') {
+            // Redirect to tabs if not already there AND not in edit-event
+            if (segments[0] !== '(tabs)' && segments[0] !== 'edit-event') {
                 router.replace('/(tabs)');
             }
         }
@@ -67,6 +67,7 @@ function RootLayoutNav() {
                 <Stack.Screen name="login" />
                 <Stack.Screen name="onboarding" />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="edit-event" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />

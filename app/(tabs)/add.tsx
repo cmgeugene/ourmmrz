@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, Alert, Platform } from 'react-native';
-import React, { useState } from 'react';
-import { Stack, useRouter } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { EventService } from '../../services/eventService';
 import { useAuth } from '../../components/ctx/AuthContext';
@@ -9,12 +9,22 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AddEventScreen() {
     const router = useRouter();
+    const { refresh } = useLocalSearchParams();
     const { user, coupleId } = useAuth();
     const [image, setImage] = useState<string | null>(null);
     const [description, setDescription] = useState('');
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Reset form when entering with a new refresh timestamp
+    useEffect(() => {
+        if (refresh) {
+            setImage(null);
+            setDescription('');
+            setDate(new Date());
+        }
+    }, [refresh]);
 
     const pickImage = async () => {
         // Request permission
