@@ -85,6 +85,38 @@ export default function OnboardingScreen() {
         }
     }
 
+    const connectWithSelf = async () => {
+        try {
+            setLoading(true);
+            const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+            // 1. Create couple
+            const { data: couple, error: coupleError } = await supabase
+                .from('couples')
+                .insert({ invite_code: code })
+                .select()
+                .single();
+
+            if (coupleError) throw coupleError;
+
+            // 2. Update user (connect to self)
+            const { error: userError } = await supabase
+                .from('users')
+                .update({ couple_id: couple.id })
+                .eq('id', user.id);
+
+            if (userError) throw userError;
+
+            Alert.alert('Success', '테스트 모드로 연결되었습니다.', [
+                { text: '확인', onPress: () => refreshProfile() }
+            ]);
+        } catch (e: any) {
+            Alert.alert('Error', e.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <View className="flex-1 bg-white px-6 pt-20">
             <Text className="text-3xl font-bold text-gray-900 mb-2">파트너 연결</Text>
@@ -147,6 +179,11 @@ export default function OnboardingScreen() {
                     </View>
                 )}
             </View>
+
+            {/* Test Mode */}
+            <TouchableOpacity onPress={connectWithSelf} className="mt-10 mb-10 self-center">
+                <Text className="text-gray-400 underline text-sm">테스트용: 나 혼자 연결하기</Text>
+            </TouchableOpacity>
         </View>
     );
 }

@@ -20,6 +20,14 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
+                name="add"
+                options={{
+                    href: null, // Hide from tab bar, accessed via header button in index
+                    // title: 'Add Memory',
+                    // tabBarStyle: { display: 'none' }, // Hide tab bar on this screen
+                }}
+            />
+            <Tabs.Screen
                 name="profile"
                 options={{
                     title: 'Profile',

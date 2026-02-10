@@ -40,16 +40,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        console.log('AuthContext: useEffect started');
         supabase.auth.getSession().then(({ data: { session } }) => {
+            console.log('AuthContext: getSession result', !!session);
             setSession(session);
-            if (session) fetchProfile(session.user.id);
-            else setIsLoading(false);
+            if (session) {
+                console.log('AuthContext: Fetching profile for', session.user.id);
+                fetchProfile(session.user.id, session.user.email);
+            } else {
+                console.log('AuthContext: No session, setting isLoading false');
+                setIsLoading(false);
+            }
+        }).catch(err => {
+            console.error('AuthContext: getSession error', err);
+            setIsLoading(false);
         });
 
         const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            console.log('AuthContext: onAuthStateChange', _event, !!session);
             setSession(session);
-            if (session) fetchProfile(session.user.id);
-            else {
+            if (session) {
+                fetchProfile(session.user.id, session.user.email);
+            } else {
                 setUser(null);
                 setCoupleId(null);
                 setIsLoading(false);
@@ -62,13 +74,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         };
     }, []);
 
-    const fetchProfile = async (userId: string) => {
+    const fetchProfile = async (userId: string, email?: string) => {
         try {
-            const { data, error } = await supabase
+            let { data, error } = await supabase
                 .from('users')
                 .select('*')
                 .eq('id', userId)
                 .single();
+
+            // If profile doesn't exist (PGRST116), create it
+            if (error && error.code === 'PGRST116') {
+                console.log('Profile missing, creating new profile...');
+                const { data: newData, error: insertError } = await supabase
+                    .from('users')
+                    .insert([{ id: userId, email: email }])
+                    .select()
+                    .single();
+
+                if (insertError) {
+                    // Check for duplicate key error (race condition)
+                    if (insertError.code === '23505') {
+                        const { data: retryData, error: retryError } = await supabase
+                            .from('users')
+                            .select('*')
+                            .eq('id', userId)
+                            .single();
+
+                        if (retryError) {
+                            console.error('Error fetching profile after duplicate:', retryError);
+                            return;
+                        }
+                        data = retryData;
+                        error = null;
+                    } else {
+                        console.error('Error creating profile:', insertError);
+                        return;
+                    }
+                }
+                data = newData;
+                error = null;
+            }
 
             if (error) {
                 console.error('Error fetching profile:', error);

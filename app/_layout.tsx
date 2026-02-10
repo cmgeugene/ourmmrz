@@ -36,8 +36,8 @@ function useProtectedRoute() {
             }
         } else if (session && coupleId) {
             // Signed in and couple connected
-            // If user is trying to access login or onboarding, redirect to tabs
-            if (segments[0] === 'login' || segments[0] === 'onboarding') {
+            // Redirect to tabs if not already there
+            if (segments[0] !== '(tabs)') {
                 router.replace('/(tabs)');
             }
         }
@@ -52,6 +52,7 @@ function RootLayoutNav() {
 
     useEffect(() => {
         if (loaded) {
+            console.log('RootLayout: Hiding splash screen');
             SplashScreen.hideAsync();
         }
     }, [loaded]);
