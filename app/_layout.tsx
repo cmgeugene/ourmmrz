@@ -36,8 +36,8 @@ function useProtectedRoute() {
             }
         } else if (session && coupleId) {
             // Signed in and couple connected
-            // Redirect to tabs if not already there AND not in edit-event
-            if (segments[0] !== '(tabs)' && segments[0] !== 'edit-event') {
+            // Redirect to tabs if not already there AND not in allowed screens
+            if (segments[0] !== '(tabs)' && segments[0] !== 'edit-event' && segments[0] !== 'view-event') {
                 router.replace('/(tabs)');
             }
         }

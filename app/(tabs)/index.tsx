@@ -6,6 +6,8 @@ import { EventService } from '../../services/eventService';
 import { TimelineEvent } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import { PLACE_CATEGORIES } from '../../constants/categories';
 
 export default function HomeScreen() {
     const { coupleId, user } = useAuth();
@@ -87,7 +89,17 @@ export default function HomeScreen() {
                         const imageUrl = latest.image_path ? EventService.getImageUrl(latest.image_path) : null;
                         return (
                             <TouchableOpacity
-                                onPress={() => router.push('/(tabs)/timeline')}
+                                onPress={() => router.push({
+                                    pathname: '/view-event',
+                                    params: {
+                                        id: latest.id,
+                                        description: latest.description || '',
+                                        event_date: latest.event_date,
+                                        image_path: latest.image_path || '',
+                                        location: latest.location || '',
+                                        keywords: JSON.stringify(latest.keywords || [])
+                                    }
+                                })}
                                 className="bg-white p-4 rounded-3xl shadow-card"
                             >
                                 {imageUrl && (
@@ -97,18 +109,38 @@ export default function HomeScreen() {
                                         resizeMode="cover"
                                     />
                                 )}
-                                <View className="flex-row justify-between items-center">
-                                    <View>
-                                        <Text className="text-gray-900 font-bold text-base">
-                                            {format(new Date(latest.event_date), 'MMMM d, yyyy')}
+                                <View className="flex-row justify-between items-start">
+                                    <View className="flex-1 pr-2">
+                                        <Text className="text-gray-900 font-bold text-lg mb-1">
+                                            {format(new Date(latest.event_date), 'yy.M.d EEEE', { locale: ko })}
                                         </Text>
+
+                                        {/* Location & Keywords Inline */}
+                                        <View className="flex-row flex-wrap items-center mb-2">
+                                            <Ionicons name="location-sharp" size={14} color="#6B7280" style={{ marginRight: 4 }} />
+                                            <Text className="text-gray-600 text-sm font-medium font-sans mr-2">
+                                                {latest.location || '어딘가에서'}
+                                            </Text>
+
+                                            {latest.keywords?.map((keyword, index) => (
+                                                <View key={index} className="mr-1.5 mb-1 bg-pink-50 px-1.5 py-0.5 rounded-md border border-pink-100">
+                                                    <Text className="text-pink-600 text-[10px] font-bold">#{keyword}</Text>
+                                                </View>
+                                            ))}
+                                        </View>
+
+
+
+                                        {/* Description */}
                                         {latest.description && (
-                                            <Text className="text-gray-500 text-sm mt-1" numberOfLines={1}>
+                                            <Text className="text-gray-500 text-sm leading-relaxed" numberOfLines={2}>
                                                 {latest.description}
                                             </Text>
                                         )}
                                     </View>
-                                    <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+                                    <View className="mt-1">
+                                        <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+                                    </View>
                                 </View>
                             </TouchableOpacity>
                         );

@@ -7,6 +7,7 @@ import { TimelineEvent } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { PLACE_CATEGORIES } from '../../constants/categories';
 
 const { width } = Dimensions.get('window');
 
@@ -90,12 +91,14 @@ export default function TimelineScreen() {
                     text: "Edit",
                     onPress: () => {
                         router.push({
-                            pathname: '/edit-event',
+                            pathname: '/view-event',
                             params: {
                                 id: item.id,
                                 description: item.description || '',
                                 event_date: item.event_date,
-                                image_path: item.image_path || ''
+                                image_path: item.image_path || '',
+                                location: item.location || '',
+                                keywords: JSON.stringify(item.keywords || [])
                             }
                         });
                     }
@@ -139,8 +142,16 @@ export default function TimelineScreen() {
 
                         {/* Node (Category Icon) - Always visible */}
                         <View className="w-8 h-8 bg-white rounded-full items-center justify-center z-10 border border-gray-100 shadow-sm">
-                            {/* Placeholder Icon: Category based (w-5 h-5 visual) */}
-                            <Ionicons name="star" size={16} color="#3B82F6" />
+                            {/* Determine icon based on category */}
+                            {(() => {
+                                // Find matching category
+                                const matchingCategory = PLACE_CATEGORIES.find(cat =>
+                                    item.keywords && item.keywords.some(k => cat.keywords.includes(k))
+                                );
+                                const iconName = matchingCategory ? matchingCategory.icon : 'star';
+
+                                return <Ionicons name={iconName as any} size={16} color="#3B82F6" />;
+                            })()}
                         </View>
 
                         {/* Bottom Line (connects to next) - extend to bottom of container */}
@@ -150,7 +161,21 @@ export default function TimelineScreen() {
                     {/* Right Column: Content Card */}
                     <View className="flex-1 mb-6">
                         {/* Memory Card */}
-                        <View className="bg-white rounded-2xl shadow-card overflow-hidden">
+                        <TouchableOpacity
+                            onPress={() => router.push({
+                                pathname: '/view-event',
+                                params: {
+                                    id: item.id,
+                                    description: item.description || '',
+                                    event_date: item.event_date,
+                                    image_path: item.image_path || '',
+                                    location: item.location || '',
+                                    keywords: JSON.stringify(item.keywords || [])
+                                }
+                            })}
+                            activeOpacity={0.9}
+                            className="bg-white rounded-2xl shadow-card overflow-hidden"
+                        >
                             {/* Image */}
                             {imageUrl && (
                                 <Image
@@ -163,15 +188,34 @@ export default function TimelineScreen() {
                             {/* Content: Description & Options */}
                             <View className="p-3">
                                 <View className="flex-row justify-between items-start">
-                                    <Text className="text-gray-800 text-base leading-relaxed font-sans flex-1 mr-2">
-                                        {item.description || "No description"}
-                                    </Text>
+                                    <View className="flex-1 mr-2">
+                                        {/* Location & Icon */}
+                                        {/* Location & Keywords Inline */}
+                                        <View className="flex-row flex-wrap items-center mb-2">
+                                            <Ionicons name="location-sharp" size={14} color="#6B7280" style={{ marginRight: 4 }} />
+                                            <Text className="text-gray-600 text-sm font-medium font-sans mr-2">
+                                                {item.location || '어딘가에서'}
+                                            </Text>
+
+                                            {item.keywords?.map((keyword, index) => (
+                                                <View key={index} className="mr-1.5 mb-1 bg-pink-50 px-1.5 py-0.5 rounded-md border border-pink-100">
+                                                    <Text className="text-pink-600 text-[10px] font-bold">#{keyword}</Text>
+                                                </View>
+                                            ))}
+                                        </View>
+
+
+
+                                        <Text className="text-gray-800 text-base leading-relaxed font-sans">
+                                            {item.description || "No description"}
+                                        </Text>
+                                    </View>
                                     <TouchableOpacity onPress={() => handleMorePress(item)} className="p-1">
                                         <Ionicons name="ellipsis-horizontal" size={18} color="#94A3B8" />
                                     </TouchableOpacity>
                                 </View>
                             </View>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
