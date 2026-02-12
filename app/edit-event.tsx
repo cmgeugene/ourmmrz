@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { PLACE_CATEGORIES } from '../constants/categories';
 import { convertKATECHtoWGS84 } from '../utils/coordinate';
+import { StarRatingInput } from '../components/StarRating';
 
 // Naver API Keys
 const NAVER_SEARCH_CLIENT_ID = process.env.EXPO_PUBLIC_NAVER_SEARCH_CLIENT_ID;
@@ -34,6 +35,7 @@ export default function EditEventScreen() {
     const initialDescription = params.description as string;
     const initialDate = params.event_date as string;
     const initialLocation = params.location as string;
+    const initialRating = params.rating ? parseFloat(params.rating as string) : 0;
     const initialLatitude = params.latitude ? parseFloat(params.latitude as string) : null;
     const initialLongitude = params.longitude ? parseFloat(params.longitude as string) : null;
     const imagePath = params.image_path as string;
@@ -48,6 +50,7 @@ export default function EditEventScreen() {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>(initialKeywordsIdx || []);
     const [date, setDate] = useState(new Date(initialDate || Date.now()));
+    const [rating, setRating] = useState<number>(initialRating || 0);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -140,7 +143,9 @@ export default function EditEventScreen() {
                 latitude: latitude ?? undefined,
                 longitude: longitude ?? undefined,
                 keywords: selectedKeywords,
+                keywords: selectedKeywords,
                 event_date: date.toISOString(),
+                rating: rating > 0 ? rating : undefined,
             });
 
             Alert.alert('Success', 'Memory updated!', [
@@ -281,6 +286,14 @@ export default function EditEventScreen() {
                     ) : null}
                 </View>
 
+
+
+                {/* Rating Section */}
+                <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50 flex-col items-center">
+                    <Text className="text-gray-900 font-bold font-sans text-base mb-2 self-start">Rate this memory</Text>
+                    <StarRatingInput rating={rating} onRatingChange={setRating} size={40} />
+                </View>
+
                 {/* Categories Section */}
                 <View className="mb-6">
                     <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Place Category</Text>
@@ -306,35 +319,39 @@ export default function EditEventScreen() {
                 </View>
 
                 {/* Keywords Section (Dynamic) */}
-                {uniqueActiveKeywords.length > 0 && (
-                    <View className="mb-6">
-                        <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Keywords</Text>
-                        <View className="flex-row flex-wrap">
-                            {uniqueActiveKeywords.map((keyword, index) => (
-                                <TouchableOpacity
-                                    key={`${keyword}-${index}`}
-                                    onPress={() => toggleKeyword(keyword)}
-                                    className={`mr-2 mb-2 px-3 py-1.5 rounded-full border ${selectedKeywords.includes(keyword) ? 'bg-pink-50 border-pink-200' : 'bg-gray-50 border-gray-100'}`}
-                                >
-                                    <Text className={`font-sans text-sm ${selectedKeywords.includes(keyword) ? 'text-pink-600 font-bold' : 'text-gray-500'}`}>
-                                        #{keyword}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                {
+                    uniqueActiveKeywords.length > 0 && (
+                        <View className="mb-6">
+                            <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Keywords</Text>
+                            <View className="flex-row flex-wrap">
+                                {uniqueActiveKeywords.map((keyword, index) => (
+                                    <TouchableOpacity
+                                        key={`${keyword}-${index}`}
+                                        onPress={() => toggleKeyword(keyword)}
+                                        className={`mr-2 mb-2 px-3 py-1.5 rounded-full border ${selectedKeywords.includes(keyword) ? 'bg-pink-50 border-pink-200' : 'bg-gray-50 border-gray-100'}`}
+                                    >
+                                        <Text className={`font-sans text-sm ${selectedKeywords.includes(keyword) ? 'text-pink-600 font-bold' : 'text-gray-500'}`}>
+                                            #{keyword}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
                         </View>
-                    </View>
-                )}
+                    )
+                }
 
                 {/* Selected Keywords Chips (Above Caption) */}
-                {selectedKeywords.length > 0 && (
-                    <View className="flex-row flex-wrap mb-2 ml-1">
-                        {selectedKeywords.map((keyword, index) => (
-                            <View key={`selected-${keyword}-${index}`} className="mr-2 mb-2 bg-pink-100 px-2 py-1 rounded-md">
-                                <Text className="text-pink-600 text-xs font-bold">#{keyword}</Text>
-                            </View>
-                        ))}
-                    </View>
-                )}
+                {
+                    selectedKeywords.length > 0 && (
+                        <View className="flex-row flex-wrap mb-2 ml-1">
+                            {selectedKeywords.map((keyword, index) => (
+                                <View key={`selected-${keyword}-${index}`} className="mr-2 mb-2 bg-pink-100 px-2 py-1 rounded-md">
+                                    <Text className="text-pink-600 text-xs font-bold">#{keyword}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    )
+                }
 
                 {/* Description Input */}
                 <View className="mb-8">
@@ -365,14 +382,15 @@ export default function EditEventScreen() {
                 </TouchableOpacity>
 
                 <View className="h-20" />
-            </ScrollView>
+            </ScrollView >
 
             {/* Search Modal */}
-            <Modal
+            < Modal
                 visible={showSearchModal}
                 animationType="slide"
                 presentationStyle="pageSheet"
-                onRequestClose={() => setShowSearchModal(false)}
+                onRequestClose={() => setShowSearchModal(false)
+                }
             >
                 <View className="flex-1 bg-white pt-6">
                     <View className="px-5 pb-4 flex-row items-center border-b border-gray-100">
@@ -429,7 +447,7 @@ export default function EditEventScreen() {
                         />
                     )}
                 </View>
-            </Modal>
-        </View>
+            </Modal >
+        </View >
     );
 }

@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { PLACE_CATEGORIES } from '../../constants/categories';
+import { CompactStarRatingDisplay } from '../../components/StarRating';
 
 export default function HomeScreen() {
     const { coupleId, user } = useAuth();
@@ -97,9 +98,9 @@ export default function HomeScreen() {
                                         event_date: latest.event_date,
                                         image_path: latest.image_path || '',
                                         location: latest.location || '',
-                                        latitude: latest.latitude?.toString() || '',
                                         longitude: latest.longitude?.toString() || '',
-                                        keywords: JSON.stringify(latest.keywords || [])
+                                        keywords: JSON.stringify(latest.keywords || []),
+                                        rating: latest.rating?.toString() || ''
                                     }
                                 })}
                                 className="bg-white p-4 rounded-3xl shadow-card"
@@ -123,6 +124,13 @@ export default function HomeScreen() {
                                             <Text className="text-gray-600 text-sm font-medium font-sans mr-2">
                                                 {latest.location || '어딘가에서'}
                                             </Text>
+
+                                            {/* Star Rating Display */}
+                                            {latest.rating && (
+                                                <View className="mr-2">
+                                                    <CompactStarRatingDisplay rating={latest.rating} size={12} color="#FBBF24" />
+                                                </View>
+                                            )}
 
                                             {latest.keywords?.map((keyword, index) => (
                                                 <View key={index} className="mr-1.5 mb-1 bg-pink-50 px-1.5 py-0.5 rounded-md border border-pink-100">

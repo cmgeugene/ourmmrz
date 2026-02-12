@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { PLACE_CATEGORIES } from '../../constants/categories';
 import { convertKATECHtoWGS84 } from '../../utils/coordinate';
+import { StarRatingInput } from '../../components/StarRating';
 
 // Naver API Keys
 const NAVER_SEARCH_CLIENT_ID = process.env.EXPO_PUBLIC_NAVER_SEARCH_CLIENT_ID;
@@ -40,6 +41,7 @@ export default function AddEventScreen() {
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [rating, setRating] = useState<number>(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Search Modal State
@@ -80,6 +82,7 @@ export default function AddEventScreen() {
                 setSelectedCategories([]);
                 setSelectedKeywords([]);
                 setDate(new Date());
+                setRating(0);
                 setIsSubmitting(false);
                 setShowSearchModal(false);
                 setSearchQuery('');
@@ -191,7 +194,9 @@ export default function AddEventScreen() {
                 latitude: latitude ?? undefined,
                 longitude: longitude ?? undefined,
                 keywords: selectedKeywords,
+                keywords: selectedKeywords,
                 event_date: date.toISOString(),
+                rating: rating > 0 ? rating : undefined,
             });
 
             Alert.alert('Success', 'Memory added!', [
@@ -362,6 +367,14 @@ export default function AddEventScreen() {
                     ) : null}
                 </View>
 
+
+
+                {/* Rating Section */}
+                <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50 flex-col items-center">
+                    <Text className="text-gray-900 font-bold font-sans text-base mb-2 self-start">Rate this memory</Text>
+                    <StarRatingInput rating={rating} onRatingChange={setRating} size={40} />
+                </View>
+
                 {/* Categories Section */}
                 <View className="mb-6">
                     <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Place Category</Text>
@@ -387,35 +400,39 @@ export default function AddEventScreen() {
                 </View>
 
                 {/* Keywords Section (Dynamic) */}
-                {uniqueActiveKeywords.length > 0 && (
-                    <View className="mb-6">
-                        <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Keywords</Text>
-                        <View className="flex-row flex-wrap">
-                            {uniqueActiveKeywords.map((keyword, index) => (
-                                <TouchableOpacity
-                                    key={`${keyword}-${index}`}
-                                    onPress={() => toggleKeyword(keyword)}
-                                    className={`mr-2 mb-2 px-3 py-1.5 rounded-full border ${selectedKeywords.includes(keyword) ? 'bg-pink-50 border-pink-200' : 'bg-gray-50 border-gray-100'}`}
-                                >
-                                    <Text className={`font-sans text-sm ${selectedKeywords.includes(keyword) ? 'text-pink-600 font-bold' : 'text-gray-500'}`}>
-                                        #{keyword}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                {
+                    uniqueActiveKeywords.length > 0 && (
+                        <View className="mb-6">
+                            <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Keywords</Text>
+                            <View className="flex-row flex-wrap">
+                                {uniqueActiveKeywords.map((keyword, index) => (
+                                    <TouchableOpacity
+                                        key={`${keyword}-${index}`}
+                                        onPress={() => toggleKeyword(keyword)}
+                                        className={`mr-2 mb-2 px-3 py-1.5 rounded-full border ${selectedKeywords.includes(keyword) ? 'bg-pink-50 border-pink-200' : 'bg-gray-50 border-gray-100'}`}
+                                    >
+                                        <Text className={`font-sans text-sm ${selectedKeywords.includes(keyword) ? 'text-pink-600 font-bold' : 'text-gray-500'}`}>
+                                            #{keyword}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
                         </View>
-                    </View>
-                )}
+                    )
+                }
 
                 {/* Selected Keywords Chips (Above Caption) */}
-                {selectedKeywords.length > 0 && (
-                    <View className="flex-row flex-wrap mb-2 ml-1">
-                        {selectedKeywords.map((keyword, index) => (
-                            <View key={`selected-${keyword}-${index}`} className="mr-2 mb-2 bg-pink-100 px-2 py-1 rounded-md">
-                                <Text className="text-pink-600 text-xs font-bold">#{keyword}</Text>
-                            </View>
-                        ))}
-                    </View>
-                )}
+                {
+                    selectedKeywords.length > 0 && (
+                        <View className="flex-row flex-wrap mb-2 ml-1">
+                            {selectedKeywords.map((keyword, index) => (
+                                <View key={`selected-${keyword}-${index}`} className="mr-2 mb-2 bg-pink-100 px-2 py-1 rounded-md">
+                                    <Text className="text-pink-600 text-xs font-bold">#{keyword}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    )
+                }
 
                 {/* Description Input */}
                 <View className="mb-8">
@@ -432,14 +449,15 @@ export default function AddEventScreen() {
                 </View>
 
                 <View className="h-20" />
-            </ScrollView>
+            </ScrollView >
 
             {/* Search Modal */}
-            <Modal
+            < Modal
                 visible={showSearchModal}
                 animationType="slide"
                 presentationStyle="pageSheet"
-                onRequestClose={() => setShowSearchModal(false)}
+                onRequestClose={() => setShowSearchModal(false)
+                }
             >
                 <View className="flex-1 bg-white pt-6">
                     <View className="px-5 pb-4 flex-row items-center border-b border-gray-100">
@@ -496,7 +514,7 @@ export default function AddEventScreen() {
                         />
                     )}
                 </View>
-            </Modal>
-        </View>
+            </Modal >
+        </View >
     );
 }

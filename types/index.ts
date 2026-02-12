@@ -9,6 +9,7 @@ export interface TimelineEvent {
     latitude: number | null;
     longitude: number | null;
     keywords: string[] | null;
+    rating: number | null;
     created_at: string;
 }
 
@@ -22,6 +23,7 @@ export interface CreateEventParams {
     latitude?: number;
     longitude?: number;
     keywords?: string[];
+    rating?: number;
 }
 
 export interface UpdateEventParams {
@@ -31,4 +33,5 @@ export interface UpdateEventParams {
     latitude?: number;
     longitude?: number;
     keywords?: string[];
+    rating?: number;
 }

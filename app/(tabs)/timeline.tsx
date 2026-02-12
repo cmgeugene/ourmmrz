@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { PLACE_CATEGORIES } from '../../constants/categories';
+import { CompactStarRatingDisplay } from '../../components/StarRating';
 
 const { width } = Dimensions.get('window');
 
@@ -174,7 +175,8 @@ export default function TimelineScreen() {
                                     location: item.location || '',
                                     latitude: item.latitude?.toString() || '',
                                     longitude: item.longitude?.toString() || '',
-                                    keywords: JSON.stringify(item.keywords || [])
+                                    keywords: JSON.stringify(item.keywords || []),
+                                    rating: item.rating?.toString() || ''
                                 }
                             })}
                             activeOpacity={0.9}
@@ -200,6 +202,13 @@ export default function TimelineScreen() {
                                             <Text className="text-gray-600 text-sm font-medium font-sans mr-2">
                                                 {item.location || '어딘가에서'}
                                             </Text>
+
+                                            {/* Star Rating Display */}
+                                            {item.rating && (
+                                                <View className="mr-2">
+                                                    <CompactStarRatingDisplay rating={item.rating} size={12} color="#FBBF24" />
+                                                </View>
+                                            )}
 
                                             {item.keywords?.map((keyword, index) => (
                                                 <View key={index} className="mr-1.5 mb-1 bg-pink-50 px-1.5 py-0.5 rounded-md border border-pink-100">

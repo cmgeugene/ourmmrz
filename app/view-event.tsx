@@ -4,6 +4,7 @@ import { Stack, useRouter, useLocalSearchParams, useFocusEffect } from 'expo-rou
 import { EventService } from '../services/eventService';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { StarRatingDisplay } from '../components/StarRating';
 import { ko } from 'date-fns/locale';
 
 // Naver API Keys
@@ -24,7 +25,8 @@ export default function ViewEventScreen() {
         latitude: params.latitude ? parseFloat(params.latitude as string) : null,
         longitude: params.longitude ? parseFloat(params.longitude as string) : null,
         image_path: params.image_path,
-        keywords: params.keywords ? (typeof params.keywords === 'string' ? JSON.parse(params.keywords) : params.keywords) : []
+        keywords: params.keywords ? (typeof params.keywords === 'string' ? JSON.parse(params.keywords) : params.keywords) : [],
+        rating: params.rating ? parseFloat(params.rating as string) : null
     });
 
     // Fetch full event data whenever the screen is focused (to handle updates from Edit screen)
@@ -47,7 +49,10 @@ export default function ViewEventScreen() {
                     latitude: data.latitude,
                     longitude: data.longitude,
                     image_path: data.image_path,
-                    keywords: data.keywords
+                    longitude: data.longitude,
+                    image_path: data.image_path,
+                    keywords: data.keywords,
+                    rating: data.rating
                 });
             }
         } catch (error) {
@@ -69,8 +74,11 @@ export default function ViewEventScreen() {
                 location: eventData.location || '',
                 latitude: eventData.latitude?.toString(),
                 longitude: eventData.longitude?.toString(),
+                latitude: eventData.latitude?.toString(),
+                longitude: eventData.longitude?.toString(),
                 image_path: eventData.image_path || '',
-                keywords: JSON.stringify(eventData.keywords || [])
+                keywords: JSON.stringify(eventData.keywords || []),
+                rating: eventData.rating?.toString()
             }
         });
     };
@@ -158,6 +166,9 @@ export default function ViewEventScreen() {
                             <View className="flex-row items-center">
                                 <Ionicons name="location-sharp" size={18} color="#3B82F6" className="mr-1" />
                                 <Text className="text-gray-600 font-sans text-base">{eventData.location}</Text>
+                                <View className="ml-2">
+                                    <StarRatingDisplay rating={eventData.rating} size={16} />
+                                </View>
                             </View>
                         ) : null}
                     </View>
