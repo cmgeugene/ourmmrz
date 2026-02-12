@@ -376,7 +376,7 @@ export default function AddEventScreen() {
                 </View>
 
                 {/* Categories Section */}
-                <View className="mb-6">
+                <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
                     <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Place Category</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
                         {PLACE_CATEGORIES.map((category) => (
@@ -402,7 +402,7 @@ export default function AddEventScreen() {
                 {/* Keywords Section (Dynamic) */}
                 {
                     uniqueActiveKeywords.length > 0 && (
-                        <View className="mb-6">
+                        <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
                             <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Keywords</Text>
                             <View className="flex-row flex-wrap">
                                 {uniqueActiveKeywords.map((keyword, index) => (
@@ -435,10 +435,10 @@ export default function AddEventScreen() {
                 }
 
                 {/* Description Input */}
-                <View className="mb-8">
+                <View className="mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
                     <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Caption</Text>
                     <TextInput
-                        className="bg-white p-5 rounded-2xl border border-gray-50 shadow-sm h-40 font-sans text-gray-900 text-base leading-relaxed"
+                        className="bg-gray-50 p-4 rounded-xl text-gray-900 h-40 font-sans text-base leading-relaxed"
                         placeholder="Write something about this moment..."
                         placeholderTextColor="#9CA3AF"
                         multiline

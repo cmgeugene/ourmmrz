@@ -143,7 +143,6 @@ export default function EditEventScreen() {
                 latitude: latitude ?? undefined,
                 longitude: longitude ?? undefined,
                 keywords: selectedKeywords,
-                keywords: selectedKeywords,
                 event_date: date.toISOString(),
                 rating: rating > 0 ? rating : undefined,
             });
@@ -295,7 +294,7 @@ export default function EditEventScreen() {
                 </View>
 
                 {/* Categories Section */}
-                <View className="mb-6">
+                <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
                     <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Place Category</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
                         {PLACE_CATEGORIES.map((category) => (
@@ -321,7 +320,7 @@ export default function EditEventScreen() {
                 {/* Keywords Section (Dynamic) */}
                 {
                     uniqueActiveKeywords.length > 0 && (
-                        <View className="mb-6">
+                        <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
                             <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Keywords</Text>
                             <View className="flex-row flex-wrap">
                                 {uniqueActiveKeywords.map((keyword, index) => (
@@ -354,10 +353,10 @@ export default function EditEventScreen() {
                 }
 
                 {/* Description Input */}
-                <View className="mb-8">
+                <View className="mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
                     <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Caption</Text>
                     <TextInput
-                        className="bg-white p-5 rounded-2xl border border-gray-50 shadow-sm h-40 font-sans text-gray-900 text-base leading-relaxed"
+                        className="bg-gray-50 p-4 rounded-xl text-gray-900 h-40 font-sans text-base leading-relaxed"
                         placeholder="Write about this memory..."
                         placeholderTextColor="#9CA3AF"
                         multiline
