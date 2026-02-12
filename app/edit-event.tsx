@@ -289,13 +289,23 @@ export default function EditEventScreen() {
 
                 {/* Rating Section */}
                 <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50 flex-col items-center">
-                    <Text className="text-gray-900 font-bold font-sans text-base mb-2 self-start">Rate this memory</Text>
+                    <View className="w-full flex-row items-center mb-2">
+                        <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                            <Ionicons name="star-outline" size={18} color="#3B82F6" />
+                        </View>
+                        <Text className="text-gray-900 font-bold font-sans text-base">Rate this memory</Text>
+                    </View>
                     <StarRatingInput rating={rating} onRatingChange={setRating} size={40} />
                 </View>
 
                 {/* Categories Section */}
                 <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
-                    <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Place Category</Text>
+                    <View className="flex-row items-center mb-3">
+                        <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                            <Ionicons name="grid-outline" size={18} color="#3B82F6" />
+                        </View>
+                        <Text className="text-gray-900 font-bold font-sans text-base">Place Category</Text>
+                    </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
                         {PLACE_CATEGORIES.map((category) => (
                             <TouchableOpacity
@@ -321,7 +331,12 @@ export default function EditEventScreen() {
                 {
                     uniqueActiveKeywords.length > 0 && (
                         <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
-                            <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Keywords</Text>
+                            <View className="flex-row items-center mb-3">
+                                <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                                    <Ionicons name="pricetags-outline" size={18} color="#3B82F6" />
+                                </View>
+                                <Text className="text-gray-900 font-bold font-sans text-base">Keywords</Text>
+                            </View>
                             <View className="flex-row flex-wrap">
                                 {uniqueActiveKeywords.map((keyword, index) => (
                                     <TouchableOpacity
@@ -354,7 +369,12 @@ export default function EditEventScreen() {
 
                 {/* Description Input */}
                 <View className="mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
-                    <Text className="text-gray-900 font-bold font-sans text-base mb-3 ml-1">Caption</Text>
+                    <View className="flex-row items-center mb-3">
+                        <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                            <Ionicons name="create-outline" size={18} color="#3B82F6" />
+                        </View>
+                        <Text className="text-gray-900 font-bold font-sans text-base">Caption</Text>
+                    </View>
                     <TextInput
                         className="bg-gray-50 p-4 rounded-xl text-gray-900 h-40 font-sans text-base leading-relaxed"
                         placeholder="Write about this memory..."

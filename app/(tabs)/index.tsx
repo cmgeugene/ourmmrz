@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, ScrollView, RefreshControl } from 
 import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { useAuth } from '../../components/ctx/AuthContext';
 import { EventService } from '../../services/eventService';
+import { CoupleService } from '../../services/coupleService';
 import { TimelineEvent } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
@@ -29,20 +30,35 @@ export default function HomeScreen() {
             const data = await EventService.getEvents(coupleId);
             setEvents(data);
 
-            if (data.length > 0) {
+            setEvents(data);
+
+            // Fetch Couple Data for First Met Date
+            const couple = await CoupleService.getCouple(coupleId);
+
+            let startDate = Date.now();
+
+            if (couple && couple.first_met_date) {
+                // Use First Met Date if set
+                startDate = new Date(couple.first_met_date).getTime();
+            } else if (data.length > 0) {
+                // Fallback to oldest memory
                 const dates = data.map(e => new Date(e.event_date).getTime());
-                const minDate = Math.min(...dates);
-                const diff = Date.now() - minDate;
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
-                setDaysTogether(days);
-            } else {
-                setDaysTogether(1);
+                startDate = Math.min(...dates);
             }
+
+            const diff = Date.now() - startDate;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
+            setDaysTogether(isValidDate(startDate) ? days : 1);
+
         } catch (error) {
             console.error(error);
         } finally {
             setRefreshing(false);
         }
+    };
+
+    const isValidDate = (d: any) => {
+        return d instanceof Date ? !isNaN(d.getTime()) : !isNaN(d);
     };
 
     const onRefresh = () => {
