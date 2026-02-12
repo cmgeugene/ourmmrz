@@ -8,8 +8,8 @@ import { TimelineEvent } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { PLACE_CATEGORIES } from '../../constants/categories';
 import { CompactStarRatingDisplay } from '../../components/StarRating';
+import StatsSummary from '../../components/StatsSummary';
 
 export default function HomeScreen() {
     const { coupleId, user } = useAuth();
@@ -17,6 +17,8 @@ export default function HomeScreen() {
     const [events, setEvents] = useState<TimelineEvent[]>([]);
     const [daysTogether, setDaysTogether] = useState(0);
     const [refreshing, setRefreshing] = useState(false);
+    const [stats, setStats] = useState<any>(null);
+    const [loadingStats, setLoadingStats] = useState(true);
 
     useFocusEffect(
         useCallback(() => {
@@ -27,22 +29,25 @@ export default function HomeScreen() {
     const loadData = async () => {
         if (!coupleId) return;
         try {
-            const data = await EventService.getEvents(coupleId);
-            setEvents(data);
+            // Parallel fetching
+            const [eventsData, coupleData, statsData] = await Promise.all([
+                EventService.getEvents(coupleId),
+                CoupleService.getCouple(coupleId),
+                EventService.getStats(coupleId)
+            ]);
 
-            setEvents(data);
-
-            // Fetch Couple Data for First Met Date
-            const couple = await CoupleService.getCouple(coupleId);
+            setEvents(eventsData);
+            setStats(statsData);
+            setLoadingStats(false);
 
             let startDate = Date.now();
 
-            if (couple && couple.first_met_date) {
+            if (coupleData && coupleData.first_met_date) {
                 // Use First Met Date if set
-                startDate = new Date(couple.first_met_date).getTime();
-            } else if (data.length > 0) {
+                startDate = new Date(coupleData.first_met_date).getTime();
+            } else if (eventsData.length > 0) {
                 // Fallback to oldest memory
-                const dates = data.map(e => new Date(e.event_date).getTime());
+                const dates = eventsData.map((e: any) => new Date(e.event_date).getTime());
                 startDate = Math.min(...dates);
             }
 
@@ -54,6 +59,7 @@ export default function HomeScreen() {
             console.error(error);
         } finally {
             setRefreshing(false);
+            setLoadingStats(false);
         }
     };
 
@@ -95,6 +101,9 @@ export default function HomeScreen() {
                     {/* Add more widgets here later */}
                 </View>
             </View>
+
+            {/* Stats Summary */}
+            <StatsSummary stats={stats} loading={loadingStats} />
 
             {/* Recent Memory Highlight */}
             <View className="px-6 mb-24">

@@ -135,5 +135,21 @@ export const EventService = {
             .eq('id', id);
 
         if (error) throw error;
+    },
+
+    /**
+     * Get statistics for the couple
+     */
+    getStats: async (coupleId: string) => {
+        const { data, error } = await supabase
+            .rpc('get_couple_stats', { cid: coupleId });
+
+        if (error) throw error;
+        return data as {
+            total_memories: number;
+            latest_memory_date: string | null;
+            top_places: { location: string; count: number }[];
+            top_categories: { category: string; count: number }[];
+        };
     }
 };

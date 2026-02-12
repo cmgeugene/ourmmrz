@@ -39,6 +39,7 @@ export default function EditEventScreen() {
     const initialLatitude = params.latitude ? parseFloat(params.latitude as string) : null;
     const initialLongitude = params.longitude ? parseFloat(params.longitude as string) : null;
     const imagePath = params.image_path as string;
+    const initialCategory = params.category as string;
 
     // Parse initial keywords
     const initialKeywordsIdx = params.keywords ? (typeof params.keywords === 'string' ? JSON.parse(params.keywords) : params.keywords) : [];
@@ -47,7 +48,7 @@ export default function EditEventScreen() {
     const [location, setLocation] = useState(initialLocation || '');
     const [latitude, setLatitude] = useState<number | null>(initialLatitude);
     const [longitude, setLongitude] = useState<number | null>(initialLongitude);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategory ? [initialCategory] : []);
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>(initialKeywordsIdx || []);
     const [date, setDate] = useState(new Date(initialDate || Date.now()));
     const [rating, setRating] = useState<number>(initialRating || 0);
@@ -142,6 +143,7 @@ export default function EditEventScreen() {
                 location,
                 latitude: latitude ?? undefined,
                 longitude: longitude ?? undefined,
+                category: selectedCategories.length > 0 ? selectedCategories[0] : undefined,
                 keywords: selectedKeywords,
                 event_date: date.toISOString(),
                 rating: rating > 0 ? rating : undefined,

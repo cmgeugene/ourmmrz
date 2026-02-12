@@ -34,6 +34,7 @@ export interface UpdateEventParams {
     location?: string;
     latitude?: number;
     longitude?: number;
+    category?: string;
     keywords?: string[];
     rating?: number;
 }

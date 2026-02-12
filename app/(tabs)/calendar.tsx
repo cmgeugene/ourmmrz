@@ -132,7 +132,21 @@ export default function CalendarScreen() {
 
                 {/* Content Card */}
                 <TouchableOpacity
-                    onPress={() => router.push({ pathname: '/view-event', params: { id: item.id } })}
+                    onPress={() => router.push({
+                        pathname: '/view-event',
+                        params: {
+                            id: item.id,
+                            description: item.description || '',
+                            event_date: item.event_date,
+                            image_path: item.image_path || '',
+                            location: item.location || '',
+                            latitude: item.latitude?.toString() || '',
+                            longitude: item.longitude?.toString() || '',
+                            category: item.category || '',
+                            keywords: JSON.stringify(item.keywords || []),
+                            rating: item.rating?.toString() || ''
+                        }
+                    })}
                     className="flex-1 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-row items-center mb-4"
                 >
                     <View className="flex-1">

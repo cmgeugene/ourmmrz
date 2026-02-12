@@ -101,6 +101,7 @@ export default function TimelineScreen() {
                                 location: item.location || '',
                                 latitude: item.latitude?.toString() || '',
                                 longitude: item.longitude?.toString() || '',
+                                category: item.category || '',
                                 keywords: JSON.stringify(item.keywords || [])
                             }
                         });
@@ -175,6 +176,7 @@ export default function TimelineScreen() {
                                     location: item.location || '',
                                     latitude: item.latitude?.toString() || '',
                                     longitude: item.longitude?.toString() || '',
+                                    category: item.category || '',
                                     keywords: JSON.stringify(item.keywords || []),
                                     rating: item.rating?.toString() || ''
                                 }

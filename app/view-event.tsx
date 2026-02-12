@@ -1,5 +1,6 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, Alert, Modal, StatusBar, Linking } from 'react-native';
+import { PLACE_CATEGORIES } from '../constants/categories';
 import React, { useState } from 'react';
+import { View, Text, Image, ScrollView, TouchableOpacity, Alert, Modal, StatusBar, Linking } from 'react-native';
 import { Stack, useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { EventService } from '../services/eventService';
 import { Ionicons } from '@expo/vector-icons';
@@ -162,15 +163,29 @@ export default function ViewEventScreen() {
                             </Text>
                         </View>
 
-                        {eventData.location ? (
-                            <View className="flex-row items-center">
-                                <Ionicons name="location-sharp" size={18} color="#3B82F6" className="mr-1" />
-                                <Text className="text-gray-600 font-sans text-base">{eventData.location}</Text>
-                                <View className="ml-2">
-                                    <StarRatingDisplay rating={eventData.rating} size={16} />
+                        <View className="flex-row items-center flex-wrap gap-2 mb-2">
+                            {/* Category Badge */}
+                            {eventData.category && (() => {
+                                const cat = PLACE_CATEGORIES.find(c => c.id === eventData.category);
+                                return cat ? (
+                                    <View className="flex-row items-center bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+                                        <Ionicons name={cat.icon as any} size={14} color="#3B82F6" style={{ marginRight: 4 }} />
+                                        <Text className="text-blue-600 text-xs font-bold font-sans">{cat.label}</Text>
+                                    </View>
+                                ) : null;
+                            })()}
+
+                            {/* Location */}
+                            {eventData.location ? (
+                                <View className="flex-row items-center">
+                                    <Ionicons name="location-sharp" size={16} color="#6B7280" className="mr-1" />
+                                    <Text className="text-gray-600 font-sans text-base">{eventData.location}</Text>
                                 </View>
-                            </View>
-                        ) : null}
+                            ) : null}
+
+                            {/* Rating */}
+                            <StarRatingDisplay rating={eventData.rating} size={16} />
+                        </View>
                     </View>
 
                     {/* Static Map Display */}
