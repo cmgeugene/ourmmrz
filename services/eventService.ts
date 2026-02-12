@@ -18,6 +18,27 @@ export const EventService = {
         return data || [];
     },
 
+    /**
+     * Fetch timeline events for a specific month
+     */
+    getEventsByMonth: async (coupleId: string, year: number, month: number): Promise<TimelineEvent[]> => {
+        // Calculate start and end date of the month
+        // Month is 1-indexed (1 = January, 12 = December)
+        const startDate = new Date(year, month - 1, 1).toISOString();
+        const endDate = new Date(year, month, 0, 23, 59, 59).toISOString();
+
+        const { data, error } = await supabase
+            .from('timeline_events')
+            .select('*')
+            .eq('couple_id', coupleId)
+            .gte('event_date', startDate)
+            .lte('event_date', endDate)
+            .order('event_date', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    },
+
     getEventById: async (id: string): Promise<TimelineEvent | null> => {
         const { data, error } = await supabase
             .from('timeline_events')

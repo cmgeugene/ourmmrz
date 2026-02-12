@@ -42,16 +42,16 @@ export default function TabLayout() {
                 options={{
                     title: 'Timeline',
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "calendar" : "calendar-outline"} size={24} color={color} />
+                        <Ionicons name={focused ? "list" : "list-outline"} size={26} color={color} />
                     ),
                 }}
             />
             <Tabs.Screen
-                name="map"
+                name="calendar"
                 options={{
-                    title: 'Map',
+                    title: 'Calendar',
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "map" : "map-outline"} size={24} color={color} />
+                        <Ionicons name={focused ? "calendar" : "calendar-outline"} size={24} color={color} />
                     ),
                 }}
             />

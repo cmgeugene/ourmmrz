@@ -193,7 +193,7 @@ export default function AddEventScreen() {
                 location: location,
                 latitude: latitude ?? undefined,
                 longitude: longitude ?? undefined,
-                keywords: selectedKeywords,
+                category: selectedCategories.length > 0 ? selectedCategories[0] : undefined,
                 keywords: selectedKeywords,
                 event_date: date.toISOString(),
                 rating: rating > 0 ? rating : undefined,
