@@ -91,13 +91,15 @@ export default function TimelineScreen() {
                     text: "Edit",
                     onPress: () => {
                         router.push({
-                            pathname: '/view-event',
+                            pathname: '/edit-event',
                             params: {
                                 id: item.id,
                                 description: item.description || '',
                                 event_date: item.event_date,
                                 image_path: item.image_path || '',
                                 location: item.location || '',
+                                latitude: item.latitude?.toString() || '',
+                                longitude: item.longitude?.toString() || '',
                                 keywords: JSON.stringify(item.keywords || [])
                             }
                         });
@@ -170,6 +172,8 @@ export default function TimelineScreen() {
                                     event_date: item.event_date,
                                     image_path: item.image_path || '',
                                     location: item.location || '',
+                                    latitude: item.latitude?.toString() || '',
+                                    longitude: item.longitude?.toString() || '',
                                     keywords: JSON.stringify(item.keywords || [])
                                 }
                             })}

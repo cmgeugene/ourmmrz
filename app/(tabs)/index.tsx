@@ -97,6 +97,8 @@ export default function HomeScreen() {
                                         event_date: latest.event_date,
                                         image_path: latest.image_path || '',
                                         location: latest.location || '',
+                                        latitude: latest.latitude?.toString() || '',
+                                        longitude: latest.longitude?.toString() || '',
                                         keywords: JSON.stringify(latest.keywords || [])
                                     }
                                 })}

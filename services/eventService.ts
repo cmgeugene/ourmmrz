@@ -18,6 +18,17 @@ export const EventService = {
         return data || [];
     },
 
+    getEventById: async (id: string): Promise<TimelineEvent | null> => {
+        const { data, error } = await supabase
+            .from('timeline_events')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
     /**
      * Upload an image to Supabase Storage
      * Returns the path in storage

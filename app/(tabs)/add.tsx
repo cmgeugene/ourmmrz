@@ -1,12 +1,31 @@
-import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, Alert, Platform, Modal, FlatList, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
+import { Stack, useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { EventService } from '../../services/eventService';
 import { useAuth } from '../../components/ctx/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { PLACE_CATEGORIES } from '../../constants/categories';
+import { convertKATECHtoWGS84 } from '../../utils/coordinate';
+
+// Naver API Keys
+const NAVER_SEARCH_CLIENT_ID = process.env.EXPO_PUBLIC_NAVER_SEARCH_CLIENT_ID;
+const NAVER_SEARCH_CLIENT_SECRET = process.env.EXPO_PUBLIC_NAVER_SEARCH_CLIENT_SECRET;
+const NAVER_MAP_CLIENT_ID = process.env.EXPO_PUBLIC_NAVER_MAP_CLIENT_ID;
+const NAVER_MAP_CLIENT_SECRET = process.env.EXPO_PUBLIC_NAVER_MAP_CLIENT_SECRET;
+
+interface SearchResult {
+    title: string;
+    link: string;
+    category: string;
+    description: string;
+    telephone: string;
+    address: string;
+    roadAddress: string;
+    mapx: string;
+    mapy: string;
+}
 
 export default function AddEventScreen() {
     const router = useRouter();
@@ -15,24 +34,59 @@ export default function AddEventScreen() {
     const [image, setImage] = useState<string | null>(null);
     const [description, setDescription] = useState('');
     const [location, setLocation] = useState('');
+    const [latitude, setLatitude] = useState<number | null>(null);
+    const [longitude, setLongitude] = useState<number | null>(null);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Reset form when entering with a new refresh timestamp
-    useEffect(() => {
-        if (refresh) {
-            setImage(null);
-            setDescription('');
-            setLocation('');
-            setSelectedCategories([]);
-            setSelectedKeywords([]);
-            setDate(new Date());
-            setIsSubmitting(false);
-        }
-    }, [refresh]);
+    // Search Modal State
+    const [showSearchModal, setShowSearchModal] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+
+    // Reset form when entering with a new refresh timestamp OR whenever the screen is focused
+    useFocusEffect(
+        React.useCallback(() => {
+            // Check if we should preserve state (e.g. returning from image picker)
+            // For now, let's reset to ensure clean state as requested. 
+            // If image picker return causes issues, we might need a flag.
+            // But since image picker is usually a modal or external activity, keeping it simple first.
+            // Actually, image picker might NOT trigger unmount but might trigger focus.
+            // Let's reset ONLY if we want a fresh start.
+            // The user requested "initialization of modal", implies fresh start.
+
+            // However, we must be careful not to clear state if we just picked an image.
+            // A safer way is to check if we have data and if we just came from navigation.
+            // But useFocusEffect runs on focus. 
+
+            // Alternative: Reset only on mount? No, tab stays mounted.
+            // Let's add a cleanup function or check navigation params.
+
+            // If the user wants to "Reset", maybe we should just reset unless we are in the middle of editing?
+            // "Designated date, location search -> selection -> map image display are still there."
+            // This suggests they left the screen and came back.
+
+            return () => {
+                // Cleanup when leaving the screen
+                setImage(null);
+                setDescription('');
+                setLocation('');
+                setLatitude(null);
+                setLongitude(null);
+                setSelectedCategories([]);
+                setSelectedKeywords([]);
+                setDate(new Date());
+                setIsSubmitting(false);
+                setShowSearchModal(false);
+                setSearchQuery('');
+                setSearchResults([]);
+            };
+        }, [])
+    );
 
     const pickImage = async () => {
         // Request permission
@@ -56,6 +110,65 @@ export default function AddEventScreen() {
         }
     };
 
+    const handleSearch = async () => {
+        if (!searchQuery.trim()) return;
+
+        if (!NAVER_SEARCH_CLIENT_ID || !NAVER_SEARCH_CLIENT_SECRET) {
+            Alert.alert('Configuration Error', 'Naver Search API keys are missing.');
+            return;
+        }
+
+        setIsSearching(true);
+        try {
+            const response = await fetch(`https://openapi.naver.com/v1/search/local.json?query=${encodeURIComponent(searchQuery)}&display=5`, {
+                method: 'GET',
+                headers: {
+                    'X-Naver-Client-Id': NAVER_SEARCH_CLIENT_ID,
+                    'X-Naver-Client-Secret': NAVER_SEARCH_CLIENT_SECRET,
+                },
+            });
+
+            const data = await response.json();
+            console.log("Search API Response Items:", data.items ? data.items.length : "No items");
+            if (data.items) {
+                setSearchResults(data.items);
+            } else {
+                setSearchResults([]);
+            }
+        } catch (error) {
+            console.error('Search failed:', error);
+            Alert.alert('Error', 'Failed to search location.');
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleCloseSearchModal = () => {
+        setShowSearchModal(false);
+        setSearchQuery('');
+        setSearchResults([]);
+        setIsSearching(false);
+    };
+
+    const handleSelectLocation = (item: SearchResult) => {
+        console.log("handleSelectLocation triggered with item:", JSON.stringify(item));
+
+        // Convert KATECH to WGS84
+        // Note: Naver Search API returns integer strings for mapx/mapy.
+        console.log("Raw mapx:", item.mapx, "Raw mapy:", item.mapy);
+
+        const { latitude, longitude } = convertKATECHtoWGS84(item.mapx, item.mapy);
+        console.log("Converted Lat:", latitude, "Converted Lng:", longitude);
+
+        // Remove HTML tags from title (e.g. <b>Starbucks</b>)
+        const cleanTitle = item.title.replace(/<[^>]+>/g, '');
+
+        setLocation(cleanTitle);
+        setLatitude(latitude);
+        setLongitude(longitude);
+        handleCloseSearchModal();
+    };
+
     const handleSubmit = async () => {
         if (!coupleId || !user) return;
         if (!image) {
@@ -75,6 +188,8 @@ export default function AddEventScreen() {
                 image_path: imagePath,
                 description: description,
                 location: location,
+                latitude: latitude ?? undefined,
+                longitude: longitude ?? undefined,
                 keywords: selectedKeywords,
                 event_date: date.toISOString(),
             });
@@ -129,6 +244,15 @@ export default function AddEventScreen() {
 
     // Filter unique keywords
     const uniqueActiveKeywords = [...new Set(activeKeywords)];
+
+    // Static Map URL generator
+    const getStaticMapUrl = (lat: number, lng: number) => {
+        if (!NAVER_MAP_CLIENT_ID) return null;
+        // Naver Static Map API v2
+        // Use 2x scale for retina displays (w=600&h=300 for 300x150 container?)
+        // Let's stick to simple first.
+        return `https://naveropenapi.apigw.ntruss.com/map-static/v2/raster?w=600&h=300&center=${lng},${lat}&level=16&markers=type:t|size:mid|pos:${lng} ${lat}|label:${encodeURIComponent(location)}&X-NCP-APIGW-API-KEY-ID=${NAVER_MAP_CLIENT_ID}`;
+    };
 
     return (
         <View className="flex-1 bg-surface">
@@ -197,19 +321,45 @@ export default function AddEventScreen() {
 
                 {/* Location Input */}
                 <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
-                    <View className="flex-row items-center mb-2">
-                        <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-                            <Ionicons name="location-outline" size={18} color="#3B82F6" />
+                    <View className="flex-row items-center mb-2 justify-between">
+                        <View className="flex-row items-center">
+                            <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                                <Ionicons name="location-outline" size={18} color="#3B82F6" />
+                            </View>
+                            <Text className="text-gray-900 font-bold font-sans text-base">Location</Text>
                         </View>
-                        <Text className="text-gray-900 font-bold font-sans text-base">Location</Text>
+                        <TouchableOpacity onPress={() => setShowSearchModal(true)} className="bg-blue-50 px-3 py-1 rounded-lg">
+                            <Text className="text-blue-500 font-bold text-sm">Search</Text>
+                        </TouchableOpacity>
                     </View>
-                    <TextInput
-                        className="bg-gray-50 p-3 rounded-xl font-sans text-gray-900 text-base"
-                        placeholder="Where did this happen?"
-                        placeholderTextColor="#9CA3AF"
-                        value={location}
-                        onChangeText={setLocation}
-                    />
+
+                    <TouchableOpacity onPress={() => setShowSearchModal(true)}>
+                        <Text className={`p-3 rounded-xl font-sans text-base ${location ? 'text-gray-900' : 'text-gray-400'}`}>
+                            {location || "Where did this happen?"}
+                        </Text>
+                    </TouchableOpacity>
+
+                    {/* Static Map Preview */}
+                    {(latitude && longitude) ? (
+                        <View className="mt-3 rounded-xl overflow-hidden h-48 w-full bg-gray-100 relative">
+                            <Image
+                                source={{
+                                    uri: `https://maps.apigw.ntruss.com/map-static/v2/raster?w=600&h=450&center=${longitude},${latitude}&level=17&markers=type:d%7Csize:mid%7Cpos:${longitude}%20${latitude}`,
+                                    headers: {
+                                        'X-NCP-APIGW-API-KEY-ID': NAVER_MAP_CLIENT_ID || '',
+                                        'X-NCP-APIGW-API-KEY': NAVER_MAP_CLIENT_SECRET || ''
+                                    }
+                                }}
+                                className="w-full h-full"
+                                resizeMode="cover"
+                                onError={(e) => {
+                                    console.log("Static Map Load Error:", e.nativeEvent.error);
+                                }}
+                            />
+                            {/* Map Overlay to prevent interaction confusion if needed */}
+                            <View className="absolute inset-0 border border-black/5 rounded-xl pointer-events-none" />
+                        </View>
+                    ) : null}
                 </View>
 
                 {/* Categories Section */}
@@ -283,6 +433,70 @@ export default function AddEventScreen() {
 
                 <View className="h-20" />
             </ScrollView>
+
+            {/* Search Modal */}
+            <Modal
+                visible={showSearchModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowSearchModal(false)}
+            >
+                <View className="flex-1 bg-white pt-6">
+                    <View className="px-5 pb-4 flex-row items-center border-b border-gray-100">
+                        <TouchableOpacity onPress={handleCloseSearchModal} className="mr-4">
+                            <Ionicons name="close" size={28} color="#1E293B" />
+                        </TouchableOpacity>
+                        <View className="flex-1 flex-row items-center bg-gray-100 rounded-xl px-3 py-2">
+                            <Ionicons name="search" size={20} color="#9CA3AF" className="mr-2" />
+                            <TextInput
+                                className="flex-1 font-sans text-base text-gray-900 h-10"
+                                placeholder="Search location (e.g. Starbucks)"
+                                placeholderTextColor="#9CA3AF"
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                onSubmitEditing={handleSearch}
+                                returnKeyType="search"
+                                autoFocus
+                            />
+                            {searchQuery.length > 0 && (
+                                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                                    <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                        <TouchableOpacity onPress={handleSearch} className="ml-3">
+                            <Text className="text-blue-500 font-bold text-base">Search</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {isSearching ? (
+                        <View className="flex-1 justify-center items-center">
+                            <ActivityIndicator size="large" color="#3B82F6" />
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={searchResults}
+                            keyExtractor={(item, index) => index.toString()}
+                            contentContainerStyle={{ padding: 20 }}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    className="py-4 border-b border-gray-50"
+                                    onPress={() => handleSelectLocation(item)}
+                                >
+                                    <Text className="text-gray-900 font-bold text-base mb-1">{item.title.replace(/<[^>]+>/g, '')}</Text>
+                                    <Text className="text-gray-500 text-sm">{item.roadAddress || item.address}</Text>
+                                    <Text className="text-gray-400 text-xs mt-1">{item.category}</Text>
+                                </TouchableOpacity>
+                            )}
+                            ListEmptyComponent={
+                                <View className="mt-20 items-center">
+                                    <Text className="text-gray-400 text-base">No results found</Text>
+                                </View>
+                            }
+                        />
+                    )}
+                </View>
+            </Modal>
         </View>
     );
 }

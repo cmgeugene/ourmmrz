@@ -1,25 +1,62 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, Alert, Modal, StatusBar } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Alert, Modal, StatusBar, Linking } from 'react-native';
 import React, { useState } from 'react';
-import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
+import { Stack, useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { EventService } from '../services/eventService';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+
+// Naver API Keys
+const NAVER_MAP_CLIENT_ID = process.env.EXPO_PUBLIC_NAVER_MAP_CLIENT_ID;
+const NAVER_MAP_CLIENT_SECRET = process.env.EXPO_PUBLIC_NAVER_MAP_CLIENT_SECRET;
 
 export default function ViewEventScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
 
     const id = params.id as string;
-    const description = params.description as string;
-    const event_date = params.event_date as string;
-    const location = params.location as string;
-    const imagePath = params.image_path as string;
-    // Parse keywords
-    const keywords = params.keywords ? (typeof params.keywords === 'string' ? JSON.parse(params.keywords) : params.keywords) : [];
 
-    const imageUrl = imagePath ? EventService.getImageUrl(imagePath) : null;
-    const date = new Date(event_date);
+    // State to hold event data (initialized from params, but can be updated via fetch)
+    const [eventData, setEventData] = useState<any>({
+        description: params.description,
+        event_date: params.event_date,
+        location: params.location,
+        latitude: params.latitude ? parseFloat(params.latitude as string) : null,
+        longitude: params.longitude ? parseFloat(params.longitude as string) : null,
+        image_path: params.image_path,
+        keywords: params.keywords ? (typeof params.keywords === 'string' ? JSON.parse(params.keywords) : params.keywords) : []
+    });
+
+    // Fetch full event data whenever the screen is focused (to handle updates from Edit screen)
+    useFocusEffect(
+        React.useCallback(() => {
+            if (id) {
+                loadEventData();
+            }
+        }, [id])
+    );
+
+    const loadEventData = async () => {
+        try {
+            const data = await EventService.getEventById(id);
+            if (data) {
+                setEventData({
+                    description: data.description,
+                    event_date: data.event_date,
+                    location: data.location,
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                    image_path: data.image_path,
+                    keywords: data.keywords
+                });
+            }
+        } catch (error) {
+            console.error("Failed to load event:", error);
+        }
+    };
+
+    const imageUrl = eventData.image_path ? EventService.getImageUrl(eventData.image_path) : null;
+    const date = new Date(eventData.event_date || new Date());
     const [modalVisible, setModalVisible] = useState(false);
 
     const handleEdit = () => {
@@ -27,11 +64,37 @@ export default function ViewEventScreen() {
             pathname: '/edit-event',
             params: {
                 id,
-                description,
-                event_date,
-                location,
-                image_path: imagePath,
-                keywords: JSON.stringify(keywords)
+                description: eventData.description || '',
+                event_date: eventData.event_date,
+                location: eventData.location || '',
+                latitude: eventData.latitude?.toString(),
+                longitude: eventData.longitude?.toString(),
+                image_path: eventData.image_path || '',
+                keywords: JSON.stringify(eventData.keywords || [])
+            }
+        });
+    };
+
+    // Static Map URL generator
+    const getStaticMapUrl = (lat: number, lng: number) => {
+        if (!NAVER_MAP_CLIENT_ID) return null;
+        // Naver Static Map API v2
+        return `https://naveropenapi.apigw.ntruss.com/map-static/v2/raster?w=600&h=300&center=${lng},${lat}&level=16&markers=type:t|size:mid|pos:${lng} ${lat}|label:${encodeURIComponent(eventData.location || 'Location')}&X-NCP-APIGW-API-KEY-ID=${NAVER_MAP_CLIENT_ID}`;
+    };
+
+    const openMapApp = () => {
+        if (!eventData.latitude || !eventData.longitude) return;
+        // Open Naver Map if possible, fall back to browser or others
+        // URL Scheme for Naver Map: nmap://place?lat={lat}&lng={lng}&name={name}&appname={appname}
+        const label = eventData.location || 'Memory Location';
+        const url = `nmap://place?lat=${eventData.latitude}&lng=${eventData.longitude}&name=${encodeURIComponent(label)}&appname=com.anonymous.ourmmrz`;
+
+        Linking.canOpenURL(url).then(supported => {
+            if (supported) {
+                Linking.openURL(url);
+            } else {
+                // Fallback to Web
+                Linking.openURL(`https://map.naver.com/v5/?c=${eventData.longitude},${eventData.latitude},15,0,0,0,dh`);
             }
         });
     };
@@ -82,27 +145,53 @@ export default function ViewEventScreen() {
                 <View className="-mt-10 bg-white rounded-t-[32px] px-6 pt-8 pb-10 min-h-screen shadow-lg">
                     {/* Date & Location Header */}
                     <View className="mb-6">
-                        <Text className="text-3xl font-bold text-gray-900 font-sans mb-2">
-                            {format(date, 'yyyy.MM.dd', { locale: ko })}
-                        </Text>
-                        <Text className="text-xl text-gray-500 font-medium font-sans mb-4">
-                            {format(date, 'EEEE', { locale: ko })}
-                        </Text>
+                        <View className="flex-row items-baseline mb-4">
+                            <Text className="text-3xl font-bold text-gray-900 font-sans mr-2">
+                                {format(date, 'yyyy.MM.dd', { locale: ko })}
+                            </Text>
+                            <Text className="text-xl text-gray-500 font-medium font-sans">
+                                {format(date, 'EEEE', { locale: ko })}
+                            </Text>
+                        </View>
 
-                        {location ? (
+                        {eventData.location ? (
                             <View className="flex-row items-center">
                                 <Ionicons name="location-sharp" size={18} color="#3B82F6" className="mr-1" />
-                                <Text className="text-gray-600 font-sans text-base">{location}</Text>
+                                <Text className="text-gray-600 font-sans text-base">{eventData.location}</Text>
                             </View>
                         ) : null}
                     </View>
 
+                    {/* Static Map Display */}
+                    {(eventData.latitude && eventData.longitude) ? (
+                        <TouchableOpacity
+                            onPress={openMapApp}
+                            className="mb-6 rounded-xl overflow-hidden h-48 w-full bg-gray-100 relative shadow-sm"
+                        >
+                            <Image
+                                source={{
+                                    uri: `https://maps.apigw.ntruss.com/map-static/v2/raster?w=600&h=450&center=${eventData.longitude},${eventData.latitude}&level=16&markers=type:d%7Csize:mid%7Cpos:${eventData.longitude}%20${eventData.latitude}`,
+                                    headers: {
+                                        'X-NCP-APIGW-API-KEY-ID': NAVER_MAP_CLIENT_ID || '',
+                                        'X-NCP-APIGW-API-KEY': NAVER_MAP_CLIENT_SECRET || ''
+                                    }
+                                }}
+                                className="w-full h-full"
+                                resizeMode="cover"
+                                onError={(e) => console.log("Static Map Load Error in View:", e.nativeEvent.error)}
+                            />
+                            <View className="absolute bottom-2 right-2 bg-white/90 px-2 py-1 rounded-md">
+                                <Text className="text-xs font-bold text-gray-700">NAVER Map</Text>
+                            </View>
+                        </TouchableOpacity>
+                    ) : null}
+
                     <View className="h-[1px] bg-gray-100 w-full mb-6" />
 
                     {/* Keywords */}
-                    {keywords && keywords.length > 0 && (
+                    {eventData.keywords && eventData.keywords.length > 0 && (
                         <View className="flex-row flex-wrap mb-6">
-                            {keywords.map((keyword: string, index: number) => (
+                            {eventData.keywords.map((keyword: string, index: number) => (
                                 <View key={index} className="mr-2 mb-2 bg-pink-50 px-3 py-1.5 rounded-full border border-pink-100">
                                     <Text className="text-pink-600 text-sm font-bold">#{keyword}</Text>
                                 </View>
@@ -111,9 +200,9 @@ export default function ViewEventScreen() {
                     )}
 
                     {/* Description */}
-                    {description ? (
+                    {eventData.description ? (
                         <Text className="text-gray-800 text-lg leading-loose font-sans">
-                            {description}
+                            {eventData.description}
                         </Text>
                     ) : (
                         <Text className="text-gray-400 text-base italic font-sans">

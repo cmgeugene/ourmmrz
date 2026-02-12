@@ -90,6 +90,8 @@ export default function GalleryScreen() {
                 event_date: item.event_date,
                 image_path: item.image_path || '',
                 location: item.location || '',
+                latitude: item.latitude?.toString() || '',
+                longitude: item.longitude?.toString() || '',
                 keywords: JSON.stringify(item.keywords || [])
             }
         });
