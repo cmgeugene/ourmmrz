@@ -13,7 +13,7 @@ export default function TabLayout() {
                 tabBarActiveTintColor: '#3B82F6', // Blue-500
                 tabBarInactiveTintColor: '#94A3B8', // Slate-400
                 tabBarStyle: {
-                    borderTopWidth: 1,
+                    borderTopWidth: 0,
                     borderTopColor: '#EFF6FF', // Blue-50
                     backgroundColor: '#ffffff',
                     height: 85, // Standard height for bottom tabs

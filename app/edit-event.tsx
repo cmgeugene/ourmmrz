@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, Alert, Platform, Modal, FlatList, ActivityIndicator, KeyboardAvoidingView, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, Alert, Platform, Modal, FlatList, ActivityIndicator, KeyboardAvoidingView, SafeAreaView, StatusBar } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { EventService } from '../services/eventService';
@@ -420,7 +420,7 @@ export default function EditEventScreen() {
                 }
             >
                 <SafeAreaView className="flex-1 bg-white">
-                    <View className="flex-1 pt-4">
+                    <View className="flex-1" style={{ paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 10 : 16 }}>
                         <View className="px-5 pb-4 flex-row items-center border-b border-gray-100">
                             <TouchableOpacity onPress={handleCloseSearchModal} className="mr-4">
                                 <Ionicons name="close" size={28} color="#1E293B" />

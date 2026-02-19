@@ -85,7 +85,8 @@ export default function TasksScreen() {
 
     return (
         <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            behavior={Platform.OS === "ios" ? "padding" : "padding"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 85 : 0}
             className="flex-1 bg-surface pt-14"
         >
             <View className="px-6 mb-4 flex-row justify-between items-center">
@@ -94,6 +95,7 @@ export default function TasksScreen() {
             </View>
 
             <FlatList
+                style={{ flex: 1 }}
                 data={tasks}
                 keyExtractor={item => item.id}
                 contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
@@ -123,7 +125,7 @@ export default function TasksScreen() {
                 }
             />
 
-            <View className="p-4 bg-white border-t border-gray-100 flex-row items-center">
+            <View className="pt-4 px-4 pb-0 bg-white border-t border-gray-100 flex-row items-center">
                 <TextInput
                     className="flex-1 bg-gray-50 p-3 rounded-xl font-sans text-base mr-3 border border-gray-200"
                     placeholder="Add a new task..."
