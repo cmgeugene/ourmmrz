@@ -1,5 +1,8 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# agent settings
+.agent/
+
 # dependencies
 node_modules/
 
