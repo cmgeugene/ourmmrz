@@ -98,17 +98,32 @@ export default function HomeScreen() {
                 </View>
 
                 {/* Quick Actions */}
-                <View className="flex-row justify-center space-x-6">
+                <View className="flex-row justify-center space-x-8 px-4">
                     <TouchableOpacity
                         onPress={() => router.push('/(tabs)/add')}
-                        className="items-center"
+                        className="items-center w-20"
                     >
-                        <View className="w-14 h-14 bg-blue-50 rounded-2xl items-center justify-center mb-2 shadow-sm">
-                            <Ionicons name="add" size={28} color="#3B82F6" />
+                        <View className="w-14 h-14 bg-blue-50 rounded-2xl items-center justify-center mb-2 shadow-sm relative">
+                            <Ionicons name="camera" size={32} color="#3B82F6" />
+                            <View className="absolute -top-1 -right-1 bg-white rounded-full">
+                                <Ionicons name="add-circle" size={22} color="#3B82F6" />
+                            </View>
                         </View>
-                        <Text className="text-gray-600 text-xs font-medium">Add Memory</Text>
+                        <Text className="text-gray-600 text-xs font-medium text-center" numberOfLines={1}>New Memory</Text>
                     </TouchableOpacity>
-                    {/* Add more widgets here later */}
+
+                    <TouchableOpacity
+                        onPress={() => router.push('/(tabs)/tasks')}
+                        className="items-center w-20"
+                    >
+                        <View className="w-14 h-14 bg-green-50 rounded-2xl items-center justify-center mb-2 shadow-sm relative">
+                            <Ionicons name="checkbox" size={32} color="#3B82F6" />
+                            <View className="absolute -top-1 -right-1 bg-white rounded-full">
+                                <Ionicons name="add-circle" size={22} color="#3B82F6" />
+                            </View>
+                        </View>
+                        <Text className="text-gray-600 text-xs font-medium text-center" numberOfLines={1}>New Tasks</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
 
