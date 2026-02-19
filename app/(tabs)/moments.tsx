@@ -9,21 +9,26 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { PLACE_CATEGORIES } from '../../constants/categories';
 import { CompactStarRatingDisplay } from '../../components/StarRating';
+import CalendarView from '../../components/CalendarView';
+import GalleryView from '../../components/GalleryView';
 
 const { width } = Dimensions.get('window');
 
-export default function TimelineScreen() {
+type ViewMode = 'list' | 'calendar' | 'gallery';
+
+export default function MomentsScreen() {
     const { coupleId, user } = useAuth();
     const router = useRouter();
+    const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [events, setEvents] = useState<TimelineEvent[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Load events when screen comes into focus
+    // Load events when screen comes into focus (Only for List view, others handle their own data)
     useFocusEffect(
         useCallback(() => {
-            if (coupleId) loadEvents();
-        }, [coupleId])
+            if (coupleId && viewMode === 'list') loadEvents();
+        }, [coupleId, viewMode])
     );
 
     const loadEvents = async () => {
@@ -54,7 +59,11 @@ export default function TimelineScreen() {
 
     const onRefresh = () => {
         setRefreshing(true);
-        loadEvents();
+        if (viewMode === 'list') {
+            loadEvents();
+        }
+        // Calendar and Gallery handle their own refresh
+        setTimeout(() => setRefreshing(false), 1000);
     };
 
     const handleDelete = async (event: TimelineEvent) => {
@@ -237,53 +246,86 @@ export default function TimelineScreen() {
         );
     };
 
-    if (loading) {
-        return (
-            <View className="flex-1 justify-center items-center bg-gray-50">
-                <ActivityIndicator size="large" color="#3B82F6" />
-            </View>
-        );
-    }
+    const renderHeader = () => (
+        <View className="pt-14 pb-4 px-6 bg-white flex-row justify-between items-center shadow-sm z-10 mb-2">
+            <Text className="text-2xl font-bold text-gray-900 font-sans tracking-tight">Moments</Text>
 
-    return (
-        <View className="flex-1 bg-surface">
-            {/* Header */}
-            <View className="pt-14 pb-4 px-6 bg-white flex-row justify-between items-center shadow-sm z-10 mb-2">
-                <Text className="text-2xl font-bold text-gray-900 font-sans tracking-tight">Timeline</Text>
+            <View className="flex-row bg-gray-100 rounded-lg p-0.5">
                 <TouchableOpacity
-                    className="bg-blue-50 p-2 rounded-full"
-                    onPress={() => router.push({
-                        pathname: '/(tabs)/add',
-                        params: { refresh: Date.now().toString() }
-                    })}
+                    onPress={() => setViewMode('list')}
+                    className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm' : ''}`}
                 >
-                    <Ionicons name="add" size={24} color="#3B82F6" />
+                    <Ionicons name="list" size={20} color={viewMode === 'list' ? '#3B82F6' : '#9CA3AF'} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => setViewMode('calendar')}
+                    className={`p-2 rounded-md ${viewMode === 'calendar' ? 'bg-white shadow-sm' : ''}`}
+                >
+                    <Ionicons name="calendar" size={20} color={viewMode === 'calendar' ? '#3B82F6' : '#9CA3AF'} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => setViewMode('gallery')}
+                    className={`p-2 rounded-md ${viewMode === 'gallery' ? 'bg-white shadow-sm' : ''}`}
+                >
+                    <Ionicons name="images" size={20} color={viewMode === 'gallery' ? '#3B82F6' : '#9CA3AF'} />
                 </TouchableOpacity>
             </View>
 
-            {events.length === 0 ? (
-                <View className="flex-1 justify-center items-center p-8">
-                    <View className="w-20 h-20 bg-blue-50 rounded-full items-center justify-center mb-4">
-                        <Ionicons name="heart" size={40} color="#3B82F6" />
-                    </View>
-                    <Text className="text-gray-900 text-center text-xl font-bold font-sans mb-2">
-                        No memories yet
-                    </Text>
-                    <Text className="text-gray-500 text-center font-sans leading-relaxed">
-                        Your timeline is empty.
-                    </Text>
-                </View>
-            ) : (
-                <FlatList
-                    data={events}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3B82F6" />
-                    }
-                    contentContainerStyle={{ paddingBottom: 100 }}
-                    showsVerticalScrollIndicator={false}
-                />
+            <TouchableOpacity
+                className="bg-blue-50 p-2 rounded-full ml-2"
+                onPress={() => router.push({
+                    pathname: '/(tabs)/add',
+                    params: { refresh: Date.now().toString() }
+                })}
+            >
+                <Ionicons name="add" size={24} color="#3B82F6" />
+            </TouchableOpacity>
+        </View>
+    );
+
+    return (
+        <View className="flex-1 bg-surface">
+            {renderHeader()}
+
+            {viewMode === 'list' && (
+                <>
+                    {loading ? (
+                        <View className="flex-1 justify-center items-center bg-gray-50">
+                            <ActivityIndicator size="large" color="#3B82F6" />
+                        </View>
+                    ) : events.length === 0 ? (
+                        <View className="flex-1 justify-center items-center p-8">
+                            <View className="w-20 h-20 bg-blue-50 rounded-full items-center justify-center mb-4">
+                                <Ionicons name="heart" size={40} color="#3B82F6" />
+                            </View>
+                            <Text className="text-gray-900 text-center text-xl font-bold font-sans mb-2">
+                                No memories yet
+                            </Text>
+                            <Text className="text-gray-500 text-center font-sans leading-relaxed">
+                                Your timeline is empty.
+                            </Text>
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={events}
+                            renderItem={renderItem}
+                            keyExtractor={(item) => item.id}
+                            refreshControl={
+                                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3B82F6" />
+                            }
+                            contentContainerStyle={{ paddingBottom: 100 }}
+                            showsVerticalScrollIndicator={false}
+                        />
+                    )}
+                </>
+            )}
+
+            {viewMode === 'calendar' && (
+                <CalendarView />
+            )}
+
+            {viewMode === 'gallery' && (
+                <GalleryView />
             )}
         </View>
     );

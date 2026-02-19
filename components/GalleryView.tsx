@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, Dimensions, SectionList, ActivityIndicator, RefreshControl } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useAuth } from '../../components/ctx/AuthContext';
-import { EventService } from '../../services/eventService';
-import { TimelineEvent } from '../../types';
+import { useAuth } from '../components/ctx/AuthContext';
+import { EventService } from '../services/eventService';
+import { TimelineEvent } from '../types';
 import { format } from 'date-fns';
-import { ko } from 'date-fns/locale';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
@@ -18,7 +17,7 @@ interface GallerySection {
     data: TimelineEvent[][]; // Data is an array of "Rows" (which are arrays of events)
 }
 
-export default function GalleryScreen() {
+export default function GalleryView() {
     const { coupleId } = useAuth();
     const router = useRouter();
     const [sections, setSections] = useState<GallerySection[]>([]);
@@ -145,10 +144,6 @@ export default function GalleryScreen() {
 
     return (
         <View className="flex-1 bg-white">
-            <View className="pt-14 pb-4 px-6 bg-white flex-row justify-between items-center z-10">
-                <Text className="text-2xl font-bold text-gray-900 font-sans tracking-tight">Gallery</Text>
-            </View>
-
             {sections.length === 0 ? (
                 <View className="flex-1 justify-center items-center mt-20">
                     <View className="w-16 h-16 bg-gray-50 rounded-full items-center justify-center mb-4">

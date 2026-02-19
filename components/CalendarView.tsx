@@ -1,16 +1,16 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
-import { useAuth } from '../../components/ctx/AuthContext';
-import { EventService } from '../../services/eventService';
-import { TimelineEvent } from '../../types';
+import { useAuth } from '../components/ctx/AuthContext';
+import { EventService } from '../services/eventService';
+import { TimelineEvent } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { format, parseISO } from 'date-fns';
-import { PLACE_CATEGORIES } from '../../constants/categories';
-import { CompactStarRatingDisplay } from '../../components/StarRating';
+import { PLACE_CATEGORIES } from '../constants/categories';
+import { CompactStarRatingDisplay } from '../components/StarRating';
 
-export default function CalendarScreen() {
+export default function CalendarView() {
     const { coupleId } = useAuth();
     const router = useRouter();
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -175,11 +175,6 @@ export default function CalendarScreen() {
 
     return (
         <View className="flex-1 bg-surface">
-            {/* Header */}
-            <View className="pt-14 pb-4 px-6 bg-white z-10 shadow-sm">
-                <Text className="text-2xl font-bold text-gray-900 font-sans">Calendar</Text>
-            </View>
-
             {/* Calendar View */}
             <View className="bg-white">
                 <Calendar

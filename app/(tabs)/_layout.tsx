@@ -38,29 +38,29 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="timeline"
+                name="moments"
                 options={{
-                    title: 'Timeline',
+                    title: 'Moments',
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "list" : "list-outline"} size={26} color={color} />
+                        <Ionicons name={focused ? "albums" : "albums-outline"} size={24} color={color} />
                     ),
                 }}
             />
             <Tabs.Screen
-                name="calendar"
+                name="search"
                 options={{
-                    title: 'Calendar',
+                    title: 'Search',
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "calendar" : "calendar-outline"} size={24} color={color} />
+                        <Ionicons name={focused ? "search" : "search-outline"} size={24} color={color} />
                     ),
                 }}
             />
             <Tabs.Screen
-                name="gallery"
+                name="tasks"
                 options={{
-                    title: 'Gallery',
+                    title: 'Tasks',
                     tabBarIcon: ({ color, focused }) => (
-                        <Ionicons name={focused ? "images" : "images-outline"} size={24} color={color} />
+                        <Ionicons name={focused ? "checkbox" : "checkbox-outline"} size={24} color={color} />
                     ),
                 }}
             />
@@ -77,6 +77,25 @@ export default function TabLayout() {
                 name="add"
                 options={{
                     href: null, // Hide from tab bar
+                }}
+            />
+            {/* Hidden tabs (legacy/deleted) */}
+            <Tabs.Screen
+                name="timeline"
+                options={{
+                    href: null,
+                }}
+            />
+            <Tabs.Screen
+                name="calendar"
+                options={{
+                    href: null,
+                }}
+            />
+            <Tabs.Screen
+                name="gallery"
+                options={{
+                    href: null,
                 }}
             />
         </Tabs>
