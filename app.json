@@ -43,6 +43,12 @@
       "@react-native-google-signin/google-signin",
       "expo-font",
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2f0f5a41-7f83-4f65-82b9-32931662a8bc"
+      }
+    }
   }
 }

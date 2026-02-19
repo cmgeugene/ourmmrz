@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, Alert, Platform, Modal, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, Alert, Platform, Modal, FlatList, ActivityIndicator, KeyboardAvoidingView, SafeAreaView } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { EventService } from '../services/eventService';
@@ -203,207 +203,213 @@ export default function EditEventScreen() {
     return (
         <View className="flex-1 bg-white">
             <Stack.Screen options={{ title: 'Edit Memory', presentation: 'modal' }} />
-            <ScrollView className="p-4">
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <ScrollView className="p-4" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
-                {/* Image Display (Read-only) */}
-                {imageUrl && (
-                    <View className="w-full h-64 bg-gray-100 rounded-lg justify-center items-center mb-6 overflow-hidden border border-gray-200">
-                        <Image source={{ uri: imageUrl }} className="w-full h-full" resizeMode="cover" />
-                    </View>
-                )}
-
-                {/* Date Picker Section */}
-                <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
-                    <TouchableOpacity onPress={toggleDatePicker} className="flex-row items-center justify-between">
-                        <View className="flex-row items-center">
-                            <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-                                <Ionicons name="calendar-outline" size={18} color="#3B82F6" />
-                            </View>
-                            <Text className="text-gray-900 font-bold font-sans text-base">Date</Text>
-                        </View>
-                        <View className="bg-gray-50 px-3 py-1.5 rounded-lg">
-                            <Text className="font-sans text-gray-900 text-base font-medium">{date.toLocaleDateString()}</Text>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* Date Picker Component */}
-                    {(showDatePicker) && (
-                        <View className="mt-4 items-center">
-                            <DateTimePicker
-                                testID="dateTimePicker"
-                                value={date}
-                                mode="date"
-                                is24Hour={true}
-                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                onChange={onChangeDate}
-                                style={Platform.OS === 'ios' ? { width: '100%', height: 120 } : undefined} // Add height for iOS Spinner
-                                themeVariant="light"
-                                accentColor="#3B82F6"
-                            />
+                    {/* Image Display (Read-only) */}
+                    {imageUrl && (
+                        <View className="w-full h-64 bg-gray-100 rounded-lg justify-center items-center mb-6 overflow-hidden border border-gray-200">
+                            <Image source={{ uri: imageUrl }} className="w-full h-full" resizeMode="cover" />
                         </View>
                     )}
-                </View>
 
-                {/* Location Input */}
-                <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
-                    <View className="flex-row items-center mb-2 justify-between">
-                        <View className="flex-row items-center">
-                            <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-                                <Ionicons name="location-outline" size={18} color="#3B82F6" />
-                            </View>
-                            <Text className="text-gray-900 font-bold font-sans text-base">Location</Text>
-                        </View>
-                        <TouchableOpacity onPress={() => setShowSearchModal(true)} className="bg-blue-50 px-3 py-1 rounded-lg">
-                            <Text className="text-blue-500 font-bold text-sm">Search</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <TouchableOpacity onPress={() => setShowSearchModal(true)}>
-                        <Text className={`p-3 rounded-xl font-sans text-base ${location ? 'text-gray-900' : 'text-gray-400'}`}>
-                            {location || "Where did this happen?"}
-                        </Text>
-                    </TouchableOpacity>
-
-                    {/* Static Map Preview */}
-                    {(latitude && longitude) ? (
-                        <View className="mt-3 rounded-xl overflow-hidden h-48 w-full bg-gray-100 relative">
-                            <Image
-                                source={{
-                                    uri: `https://maps.apigw.ntruss.com/map-static/v2/raster?w=600&h=450&center=${longitude},${latitude}&level=17&markers=type:d%7Csize:mid%7Cpos:${longitude}%20${latitude}`,
-                                    headers: {
-                                        'X-NCP-APIGW-API-KEY-ID': NAVER_MAP_CLIENT_ID || '',
-                                        'X-NCP-APIGW-API-KEY': NAVER_MAP_CLIENT_SECRET || ''
-                                    }
-                                }}
-                                className="w-full h-full"
-                                resizeMode="cover"
-                                onError={(e) => {
-                                    console.log("Static Map Load Error:", e.nativeEvent.error);
-                                }}
-                            />
-                            {/* Map Overlay to prevent interaction confusion if needed */}
-                            <View className="absolute inset-0 border border-black/5 rounded-xl pointer-events-none" />
-                        </View>
-                    ) : null}
-                </View>
-
-
-
-                {/* Rating Section */}
-                <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50 flex-col items-center">
-                    <View className="w-full flex-row items-center mb-2">
-                        <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-                            <Ionicons name="star-outline" size={18} color="#3B82F6" />
-                        </View>
-                        <Text className="text-gray-900 font-bold font-sans text-base">Rate this memory</Text>
-                    </View>
-                    <StarRatingInput rating={rating} onRatingChange={setRating} size={40} />
-                </View>
-
-                {/* Categories Section */}
-                <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
-                    <View className="flex-row items-center mb-3">
-                        <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-                            <Ionicons name="grid-outline" size={18} color="#3B82F6" />
-                        </View>
-                        <Text className="text-gray-900 font-bold font-sans text-base">Place Category</Text>
-                    </View>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
-                        {PLACE_CATEGORIES.map((category) => (
-                            <TouchableOpacity
-                                key={category.id}
-                                onPress={() => toggleCategory(category.id)}
-                                className={`mr-2 px-4 py-2 rounded-full border flex-row items-center ${selectedCategories.includes(category.id) ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-200'}`}
-                            >
-                                <Ionicons
-                                    name={category.icon as any}
-                                    size={16}
-                                    color={selectedCategories.includes(category.id) ? 'white' : '#4B5563'}
-                                    style={{ marginRight: 6 }}
-                                />
-                                <Text className={`font-sans font-bold ${selectedCategories.includes(category.id) ? 'text-white' : 'text-gray-600'}`}>
-                                    {category.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
-
-                {/* Keywords Section (Dynamic) */}
-                {
-                    uniqueActiveKeywords.length > 0 && (
-                        <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
-                            <View className="flex-row items-center mb-3">
+                    {/* Date Picker Section */}
+                    <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                        <TouchableOpacity onPress={toggleDatePicker} className="flex-row items-center justify-between">
+                            <View className="flex-row items-center">
                                 <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-                                    <Ionicons name="pricetags-outline" size={18} color="#3B82F6" />
+                                    <Ionicons name="calendar-outline" size={18} color="#3B82F6" />
                                 </View>
-                                <Text className="text-gray-900 font-bold font-sans text-base">Keywords</Text>
+                                <Text className="text-gray-900 font-bold font-sans text-base">Date</Text>
                             </View>
-                            <View className="flex-row flex-wrap">
-                                {uniqueActiveKeywords.map((keyword, index) => (
-                                    <TouchableOpacity
-                                        key={`${keyword}-${index}`}
-                                        onPress={() => toggleKeyword(keyword)}
-                                        className={`mr-2 mb-2 px-3 py-1.5 rounded-full border ${selectedKeywords.includes(keyword) ? 'bg-pink-50 border-pink-200' : 'bg-gray-50 border-gray-100'}`}
-                                    >
-                                        <Text className={`font-sans text-sm ${selectedKeywords.includes(keyword) ? 'text-pink-600 font-bold' : 'text-gray-500'}`}>
-                                            #{keyword}
-                                        </Text>
-                                    </TouchableOpacity>
+                            <View className="bg-gray-50 px-3 py-1.5 rounded-lg">
+                                <Text className="font-sans text-gray-900 text-base font-medium">{date.toLocaleDateString()}</Text>
+                            </View>
+                        </TouchableOpacity>
+
+                        {/* Date Picker Component */}
+                        {(showDatePicker) && (
+                            <View className="mt-4 items-center">
+                                <DateTimePicker
+                                    testID="dateTimePicker"
+                                    value={date}
+                                    mode="date"
+                                    is24Hour={true}
+                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                    onChange={onChangeDate}
+                                    style={Platform.OS === 'ios' ? { width: '100%', height: 120 } : undefined} // Add height for iOS Spinner
+                                    themeVariant="light"
+                                    accentColor="#3B82F6"
+                                />
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Location Input */}
+                    <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                        <View className="flex-row items-center mb-2 justify-between">
+                            <View className="flex-row items-center">
+                                <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                                    <Ionicons name="location-outline" size={18} color="#3B82F6" />
+                                </View>
+                                <Text className="text-gray-900 font-bold font-sans text-base">Location</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => setShowSearchModal(true)} className="bg-blue-50 px-3 py-1 rounded-lg">
+                                <Text className="text-blue-500 font-bold text-sm">Search</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <TouchableOpacity onPress={() => setShowSearchModal(true)}>
+                            <Text className={`p-3 rounded-xl font-sans text-base ${location ? 'text-gray-900' : 'text-gray-400'}`}>
+                                {location || "Where did this happen?"}
+                            </Text>
+                        </TouchableOpacity>
+
+                        {/* Static Map Preview */}
+                        {(latitude && longitude) ? (
+                            <View className="mt-3 rounded-xl overflow-hidden h-48 w-full bg-gray-100 relative">
+                                <Image
+                                    source={{
+                                        uri: `https://maps.apigw.ntruss.com/map-static/v2/raster?w=600&h=450&center=${longitude},${latitude}&level=17&markers=type:d%7Csize:mid%7Cpos:${longitude}%20${latitude}`,
+                                        headers: {
+                                            'X-NCP-APIGW-API-KEY-ID': NAVER_MAP_CLIENT_ID || '',
+                                            'X-NCP-APIGW-API-KEY': NAVER_MAP_CLIENT_SECRET || ''
+                                        }
+                                    }}
+                                    className="w-full h-full"
+                                    resizeMode="cover"
+                                    onError={(e) => {
+                                        console.log("Static Map Load Error:", e.nativeEvent.error);
+                                    }}
+                                />
+                                {/* Map Overlay to prevent interaction confusion if needed */}
+                                <View className="absolute inset-0 border border-black/5 rounded-xl pointer-events-none" />
+                            </View>
+                        ) : null}
+                    </View>
+
+
+
+                    {/* Rating Section */}
+                    <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50 flex-col items-center">
+                        <View className="w-full flex-row items-center mb-2">
+                            <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                                <Ionicons name="star-outline" size={18} color="#3B82F6" />
+                            </View>
+                            <Text className="text-gray-900 font-bold font-sans text-base">Rate this memory</Text>
+                        </View>
+                        <StarRatingInput rating={rating} onRatingChange={setRating} size={40} />
+                    </View>
+
+                    {/* Categories Section */}
+                    <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                        <View className="flex-row items-center mb-3">
+                            <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                                <Ionicons name="grid-outline" size={18} color="#3B82F6" />
+                            </View>
+                            <Text className="text-gray-900 font-bold font-sans text-base">Place Category</Text>
+                        </View>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
+                            {PLACE_CATEGORIES.map((category) => (
+                                <TouchableOpacity
+                                    key={category.id}
+                                    onPress={() => toggleCategory(category.id)}
+                                    className={`mr-2 px-4 py-2 rounded-full border flex-row items-center ${selectedCategories.includes(category.id) ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-200'}`}
+                                >
+                                    <Ionicons
+                                        name={category.icon as any}
+                                        size={16}
+                                        color={selectedCategories.includes(category.id) ? 'white' : '#4B5563'}
+                                        style={{ marginRight: 6 }}
+                                    />
+                                    <Text className={`font-sans font-bold ${selectedCategories.includes(category.id) ? 'text-white' : 'text-gray-600'}`}>
+                                        {category.label}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+
+                    {/* Keywords Section (Dynamic) */}
+                    {
+                        uniqueActiveKeywords.length > 0 && (
+                            <View className="mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                                <View className="flex-row items-center mb-3">
+                                    <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                                        <Ionicons name="pricetags-outline" size={18} color="#3B82F6" />
+                                    </View>
+                                    <Text className="text-gray-900 font-bold font-sans text-base">Keywords</Text>
+                                </View>
+                                <View className="flex-row flex-wrap">
+                                    {uniqueActiveKeywords.map((keyword, index) => (
+                                        <TouchableOpacity
+                                            key={`${keyword}-${index}`}
+                                            onPress={() => toggleKeyword(keyword)}
+                                            className={`mr-2 mb-2 px-3 py-1.5 rounded-full border ${selectedKeywords.includes(keyword) ? 'bg-pink-50 border-pink-200' : 'bg-gray-50 border-gray-100'}`}
+                                        >
+                                            <Text className={`font-sans text-sm ${selectedKeywords.includes(keyword) ? 'text-pink-600 font-bold' : 'text-gray-500'}`}>
+                                                #{keyword}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </View>
+                        )
+                    }
+
+                    {/* Selected Keywords Chips (Above Caption) */}
+                    {
+                        selectedKeywords.length > 0 && (
+                            <View className="flex-row flex-wrap mb-2 ml-1">
+                                {selectedKeywords.map((keyword, index) => (
+                                    <View key={`selected-${keyword}-${index}`} className="mr-2 mb-2 bg-pink-100 px-2 py-1 rounded-md">
+                                        <Text className="text-pink-600 text-xs font-bold">#{keyword}</Text>
+                                    </View>
                                 ))}
                             </View>
-                        </View>
-                    )
-                }
+                        )
+                    }
 
-                {/* Selected Keywords Chips (Above Caption) */}
-                {
-                    selectedKeywords.length > 0 && (
-                        <View className="flex-row flex-wrap mb-2 ml-1">
-                            {selectedKeywords.map((keyword, index) => (
-                                <View key={`selected-${keyword}-${index}`} className="mr-2 mb-2 bg-pink-100 px-2 py-1 rounded-md">
-                                    <Text className="text-pink-600 text-xs font-bold">#{keyword}</Text>
-                                </View>
-                            ))}
+                    {/* Description Input */}
+                    <View className="mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                        <View className="flex-row items-center mb-3">
+                            <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+                                <Ionicons name="create-outline" size={18} color="#3B82F6" />
+                            </View>
+                            <Text className="text-gray-900 font-bold font-sans text-base">Caption</Text>
                         </View>
-                    )
-                }
-
-                {/* Description Input */}
-                <View className="mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
-                    <View className="flex-row items-center mb-3">
-                        <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-                            <Ionicons name="create-outline" size={18} color="#3B82F6" />
-                        </View>
-                        <Text className="text-gray-900 font-bold font-sans text-base">Caption</Text>
+                        <TextInput
+                            className="bg-gray-50 p-4 rounded-xl text-gray-900 h-40 font-sans text-base leading-relaxed"
+                            placeholder="Write about this memory..."
+                            placeholderTextColor="#9CA3AF"
+                            multiline
+                            textAlignVertical="top"
+                            value={description}
+                            onChangeText={setDescription}
+                        />
                     </View>
-                    <TextInput
-                        className="bg-gray-50 p-4 rounded-xl text-gray-900 h-40 font-sans text-base leading-relaxed"
-                        placeholder="Write about this memory..."
-                        placeholderTextColor="#9CA3AF"
-                        multiline
-                        textAlignVertical="top"
-                        value={description}
-                        onChangeText={setDescription}
-                    />
-                </View>
 
-                {/* Save Button */}
-                <TouchableOpacity
-                    onPress={handleSave}
-                    disabled={isSubmitting}
-                    className={`py-4 rounded-full items-center ${isSubmitting ? 'bg-gray-300' : 'bg-primary'}`}
-                    style={{ backgroundColor: isSubmitting ? '#ccc' : '#f4256a' }}
-                >
-                    {isSubmitting ? (
-                        <Text className="text-white font-bold text-lg">Saving...</Text>
-                    ) : (
-                        <Text className="text-white font-bold text-lg">Save Changes</Text>
-                    )}
-                </TouchableOpacity>
+                    {/* Save Button */}
+                    <TouchableOpacity
+                        onPress={handleSave}
+                        disabled={isSubmitting}
+                        className={`py-4 rounded-full items-center ${isSubmitting ? 'bg-gray-300' : 'bg-primary'}`}
+                        style={{ backgroundColor: isSubmitting ? '#ccc' : '#f4256a' }}
+                    >
+                        {isSubmitting ? (
+                            <Text className="text-white font-bold text-lg">Saving...</Text>
+                        ) : (
+                            <Text className="text-white font-bold text-lg">Save Changes</Text>
+                        )}
+                    </TouchableOpacity>
 
-                <View className="h-20" />
-            </ScrollView >
+                    <View className="h-20" />
+                </ScrollView >
+            </KeyboardAvoidingView>
 
             {/* Search Modal */}
             < Modal
@@ -413,61 +419,63 @@ export default function EditEventScreen() {
                 onRequestClose={() => setShowSearchModal(false)
                 }
             >
-                <View className="flex-1 bg-white pt-6">
-                    <View className="px-5 pb-4 flex-row items-center border-b border-gray-100">
-                        <TouchableOpacity onPress={handleCloseSearchModal} className="mr-4">
-                            <Ionicons name="close" size={28} color="#1E293B" />
-                        </TouchableOpacity>
-                        <View className="flex-1 flex-row items-center bg-gray-100 rounded-xl px-3 py-2">
-                            <Ionicons name="search" size={20} color="#9CA3AF" className="mr-2" />
-                            <TextInput
-                                className="flex-1 font-sans text-base text-gray-900 h-10"
-                                placeholder="Search location (e.g. Starbucks)"
-                                placeholderTextColor="#9CA3AF"
-                                value={searchQuery}
-                                onChangeText={setSearchQuery}
-                                onSubmitEditing={handleSearch}
-                                returnKeyType="search"
-                                autoFocus
-                            />
-                            {searchQuery.length > 0 && (
-                                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                                    <Ionicons name="close-circle" size={18} color="#9CA3AF" />
-                                </TouchableOpacity>
-                            )}
+                <SafeAreaView className="flex-1 bg-white">
+                    <View className="flex-1 pt-4">
+                        <View className="px-5 pb-4 flex-row items-center border-b border-gray-100">
+                            <TouchableOpacity onPress={handleCloseSearchModal} className="mr-4">
+                                <Ionicons name="close" size={28} color="#1E293B" />
+                            </TouchableOpacity>
+                            <View className="flex-1 flex-row items-center bg-gray-100 rounded-xl px-3 py-2">
+                                <Ionicons name="search" size={20} color="#9CA3AF" className="mr-2" />
+                                <TextInput
+                                    className="flex-1 font-sans text-base text-gray-900 h-10"
+                                    placeholder="Search location (e.g. Starbucks)"
+                                    placeholderTextColor="#9CA3AF"
+                                    value={searchQuery}
+                                    onChangeText={setSearchQuery}
+                                    onSubmitEditing={handleSearch}
+                                    returnKeyType="search"
+                                    autoFocus
+                                />
+                                {searchQuery.length > 0 && (
+                                    <TouchableOpacity onPress={() => setSearchQuery('')}>
+                                        <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                            <TouchableOpacity onPress={handleSearch} className="ml-3">
+                                <Text className="text-blue-500 font-bold text-base">Search</Text>
+                            </TouchableOpacity>
                         </View>
-                        <TouchableOpacity onPress={handleSearch} className="ml-3">
-                            <Text className="text-blue-500 font-bold text-base">Search</Text>
-                        </TouchableOpacity>
-                    </View>
 
-                    {isSearching ? (
-                        <View className="flex-1 justify-center items-center">
-                            <ActivityIndicator size="large" color="#3B82F6" />
-                        </View>
-                    ) : (
-                        <FlatList
-                            data={searchResults}
-                            keyExtractor={(item, index) => index.toString()}
-                            contentContainerStyle={{ padding: 20 }}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity
-                                    className="py-4 border-b border-gray-50"
-                                    onPress={() => handleSelectLocation(item)}
-                                >
-                                    <Text className="text-gray-900 font-bold text-base mb-1">{item.title.replace(/<[^>]+>/g, '')}</Text>
-                                    <Text className="text-gray-500 text-sm">{item.roadAddress || item.address}</Text>
-                                    <Text className="text-gray-400 text-xs mt-1">{item.category}</Text>
-                                </TouchableOpacity>
-                            )}
-                            ListEmptyComponent={
-                                <View className="mt-20 items-center">
-                                    <Text className="text-gray-400 text-base">No results found</Text>
-                                </View>
-                            }
-                        />
-                    )}
-                </View>
+                        {isSearching ? (
+                            <View className="flex-1 justify-center items-center">
+                                <ActivityIndicator size="large" color="#3B82F6" />
+                            </View>
+                        ) : (
+                            <FlatList
+                                data={searchResults}
+                                keyExtractor={(item, index) => index.toString()}
+                                contentContainerStyle={{ padding: 20 }}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        className="py-4 border-b border-gray-50"
+                                        onPress={() => handleSelectLocation(item)}
+                                    >
+                                        <Text className="text-gray-900 font-bold text-base mb-1">{item.title.replace(/<[^>]+>/g, '')}</Text>
+                                        <Text className="text-gray-500 text-sm">{item.roadAddress || item.address}</Text>
+                                        <Text className="text-gray-400 text-xs mt-1">{item.category}</Text>
+                                    </TouchableOpacity>
+                                )}
+                                ListEmptyComponent={
+                                    <View className="mt-20 items-center">
+                                        <Text className="text-gray-400 text-base">No results found</Text>
+                                    </View>
+                                }
+                            />
+                        )}
+                    </View>
+                </SafeAreaView>
             </Modal >
         </View >
     );
