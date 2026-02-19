@@ -2,9 +2,10 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme, View } from 'react-native';
+import { useAuth } from '../../components/ctx/AuthContext';
 
 export default function TabLayout() {
-    const colorScheme = useColorScheme();
+    const { session, isLoading } = useAuth();
 
     return (
         <Tabs
@@ -38,7 +39,7 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="moments"
+                name="moments_tab"
                 options={{
                     title: 'Moments',
                     tabBarIcon: ({ color, focused }) => (
@@ -77,25 +78,6 @@ export default function TabLayout() {
                 name="add"
                 options={{
                     href: null, // Hide from tab bar
-                }}
-            />
-            {/* Hidden tabs (legacy/deleted) */}
-            <Tabs.Screen
-                name="timeline"
-                options={{
-                    href: null,
-                }}
-            />
-            <Tabs.Screen
-                name="calendar"
-                options={{
-                    href: null,
-                }}
-            />
-            <Tabs.Screen
-                name="gallery"
-                options={{
-                    href: null,
                 }}
             />
         </Tabs>

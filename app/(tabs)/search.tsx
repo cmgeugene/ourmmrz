@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Image, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { useAuth } from '../components/ctx/AuthContext';
-import { EventService } from '../services/eventService';
-import { TimelineEvent } from '../types';
-import { CompactStarRatingDisplay } from '../components/StarRating';
+import { useAuth } from '../../components/ctx/AuthContext';
+import { EventService } from '../../services/eventService';
+import { TimelineEvent } from '../../types';
+import { CompactStarRatingDisplay } from '../../components/StarRating';
+
+import { PLACE_CATEGORIES } from '../../constants/categories';
 
 export default function SearchScreen() {
     const router = useRouter();
@@ -49,9 +51,14 @@ export default function SearchScreen() {
                 const descriptionMatch = event.description?.toLowerCase().includes(lowerQuery);
                 const locationMatch = event.location?.toLowerCase().includes(lowerQuery);
                 const categoryMatch = event.category?.toLowerCase().includes(lowerQuery);
+
+                // Check category label (e.g. '맛집' for 'restaurant')
+                const categoryObj = PLACE_CATEGORIES.find(c => c.id === event.category);
+                const categoryLabelMatch = categoryObj?.label.toLowerCase().includes(lowerQuery);
+
                 const keywordMatch = event.keywords?.some(k => k.toLowerCase().includes(lowerQuery));
 
-                return descriptionMatch || locationMatch || categoryMatch || keywordMatch;
+                return descriptionMatch || locationMatch || categoryMatch || categoryLabelMatch || keywordMatch;
             });
             // Sort by date descending
             results.sort((a, b) => new Date(b.event_date).getTime() - new Date(a.event_date).getTime());

@@ -1,34 +1,86 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, RefreshControl, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-interface Task {
-    id: string;
-    text: string;
-    completed: boolean;
-}
+import { useAuth } from '../../components/ctx/AuthContext';
+import { TaskService } from '../../services/taskService';
+import { Task } from '../../types';
+import { useFocusEffect } from 'expo-router';
 
 export default function TasksScreen() {
+    const { coupleId } = useAuth();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [newTask, setNewTask] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
-    const addTask = () => {
-        if (newTask.trim().length === 0) return;
-        const task: Task = {
-            id: Date.now().toString(),
-            text: newTask,
-            completed: false
-        };
-        setTasks([...tasks, task]);
-        setNewTask('');
+    useFocusEffect(
+        useCallback(() => {
+            if (coupleId) loadTasks();
+        }, [coupleId])
+    );
+
+    const loadTasks = async () => {
+        if (!coupleId) return;
+        try {
+            const data = await TaskService.getTasks(coupleId);
+            setTasks(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
     };
 
-    const toggleTask = (id: string) => {
-        setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    const onRefresh = () => {
+        setRefreshing(true);
+        loadTasks();
     };
 
-    const deleteTask = (id: string) => {
+    const addTask = async () => {
+        if (newTask.trim().length === 0 || !coupleId) return;
+        try {
+            const task = await TaskService.createTask({
+                couple_id: coupleId,
+                text: newTask
+            });
+            setTasks([task, ...tasks]);
+            setNewTask('');
+        } catch (error) {
+            console.error(error);
+            alert('Failed to add task');
+        }
+    };
+
+    const toggleTask = async (task: Task) => {
+        // Optimistic update
+        const updatedTasks = tasks.map(t =>
+            t.id === task.id ? { ...t, completed: !t.completed } : t
+        );
+        setTasks(updatedTasks);
+
+        try {
+            await TaskService.updateTask(task.id, { completed: !task.completed });
+        } catch (error) {
+            console.error(error);
+            // Revert on error
+            loadTasks();
+            alert('Failed to update task');
+        }
+    };
+
+    const deleteTask = async (id: string) => {
+        // Optimistic update
         setTasks(tasks.filter(t => t.id !== id));
+
+        try {
+            await TaskService.deleteTask(id);
+        } catch (error) {
+            console.error(error);
+            // Revert on error
+            loadTasks();
+            alert('Failed to delete task');
+        }
     };
 
     return (
@@ -45,9 +97,10 @@ export default function TasksScreen() {
                 data={tasks}
                 keyExtractor={item => item.id}
                 contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3B82F6" />}
                 renderItem={({ item }) => (
                     <View className="flex-row items-center bg-white p-4 rounded-xl mb-3 border border-gray-100 shadow-sm">
-                        <TouchableOpacity onPress={() => toggleTask(item.id)} className="mr-3">
+                        <TouchableOpacity onPress={() => toggleTask(item)} className="mr-3">
                             <Ionicons
                                 name={item.completed ? "checkbox" : "square-outline"}
                                 size={24}

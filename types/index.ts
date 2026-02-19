@@ -38,3 +38,21 @@ export interface UpdateEventParams {
     keywords?: string[];
     rating?: number;
 }
+
+export interface Task {
+    id: string;
+    couple_id: string;
+    text: string;
+    completed: boolean;
+    created_at: string;
+}
+
+export interface CreateTaskParams {
+    couple_id: string;
+    text: string;
+}
+
+export interface UpdateTaskParams {
+    text?: string;
+    completed?: boolean;
+}

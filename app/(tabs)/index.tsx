@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { useAuth } from '../../components/ctx/AuthContext';
 import { EventService } from '../../services/eventService';
 import { CoupleService } from '../../services/coupleService';
-import { TimelineEvent } from '../../types';
+import { TaskService } from '../../services/taskService';
+import { TimelineEvent, Task } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -15,6 +16,7 @@ export default function HomeScreen() {
     const { coupleId, user } = useAuth();
     const router = useRouter();
     const [events, setEvents] = useState<TimelineEvent[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [daysTogether, setDaysTogether] = useState(0);
     const [refreshing, setRefreshing] = useState(false);
     const [stats, setStats] = useState<any>(null);
@@ -30,13 +32,21 @@ export default function HomeScreen() {
         if (!coupleId) return;
         try {
             // Parallel fetching
-            const [eventsData, coupleData, statsData] = await Promise.all([
+            const [eventsData, coupleData, statsData, tasksData] = await Promise.all([
                 EventService.getEvents(coupleId),
                 CoupleService.getCouple(coupleId),
-                EventService.getStats(coupleId)
+                EventService.getStats(coupleId),
+                TaskService.getTasks(coupleId)
             ]);
 
             setEvents(eventsData);
+            const sortedTasks = (tasksData || []).sort((a: Task, b: Task) => {
+                if (a.completed === b.completed) {
+                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                }
+                return a.completed ? 1 : -1;
+            });
+            setTasks(sortedTasks);
             setStats(statsData);
             setLoadingStats(false);
 
@@ -104,6 +114,55 @@ export default function HomeScreen() {
 
             {/* Stats Summary */}
             <StatsSummary stats={stats} loading={loadingStats} />
+
+            {/* Recent Tasks Preview */}
+            <View className="px-6 mb-6">
+                <View className="flex-row justify-between items-center mb-4">
+                    <Text className="text-gray-900 font-bold text-lg font-sans">Tasks</Text>
+                    <TouchableOpacity onPress={() => router.push('/(tabs)/tasks')}>
+                        <Text className="text-blue-500 font-medium font-sans">See all</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {loadingStats ? (
+                    <View className="bg-white p-4 rounded-2xl shadow-sm">
+                        <ActivityIndicator />
+                    </View>
+                ) : tasks.length > 0 ? (
+                    <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                        {tasks.slice(0, 3).map((task, index) => (
+                            <View key={task.id}>
+                                <TouchableOpacity
+                                    onPress={() => router.push('/(tabs)/tasks')}
+                                    className="flex-row items-center p-4"
+                                >
+                                    <Ionicons
+                                        name={task.completed ? "checkbox" : "square-outline"}
+                                        size={20}
+                                        color={task.completed ? "#9CA3AF" : "#3B82F6"}
+                                    />
+                                    <Text
+                                        numberOfLines={1}
+                                        className={`flex-1 ml-3 font-sans ${task.completed ? 'text-gray-400 line-through' : 'text-gray-800'}`}
+                                    >
+                                        {task.text}
+                                    </Text>
+                                </TouchableOpacity>
+                                {index < Math.min(tasks.length, 3) - 1 && (
+                                    <View className="h-[1px] bg-gray-100 mx-4" />
+                                )}
+                            </View>
+                        ))}
+                    </View>
+                ) : (
+                    <View className="bg-white p-6 rounded-2xl shadow-sm items-center">
+                        <Text className="text-gray-400 font-sans mb-2">No tasks yet</Text>
+                        <TouchableOpacity onPress={() => router.push('/(tabs)/tasks')}>
+                            <Text className="text-blue-500 font-medium font-sans">Add a task</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
 
             {/* Recent Memory Highlight */}
             <View className="px-6 mb-24">

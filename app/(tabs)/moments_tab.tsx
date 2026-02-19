@@ -253,19 +253,46 @@ export default function MomentsScreen() {
             <View className="flex-row bg-gray-100 rounded-lg p-0.5">
                 <TouchableOpacity
                     onPress={() => setViewMode('list')}
-                    className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm' : ''}`}
+                    style={{
+                        padding: 8,
+                        borderRadius: 6,
+                        backgroundColor: viewMode === 'list' ? 'white' : 'transparent',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: viewMode === 'list' ? 0.05 : 0,
+                        shadowRadius: 1,
+                        elevation: viewMode === 'list' ? 1 : 0
+                    }}
                 >
                     <Ionicons name="list" size={20} color={viewMode === 'list' ? '#3B82F6' : '#9CA3AF'} />
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => setViewMode('calendar')}
-                    className={`p-2 rounded-md ${viewMode === 'calendar' ? 'bg-white shadow-sm' : ''}`}
+                    style={{
+                        padding: 8,
+                        borderRadius: 6,
+                        backgroundColor: viewMode === 'calendar' ? 'white' : 'transparent',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: viewMode === 'calendar' ? 0.05 : 0,
+                        shadowRadius: 1,
+                        elevation: viewMode === 'calendar' ? 1 : 0
+                    }}
                 >
                     <Ionicons name="calendar" size={20} color={viewMode === 'calendar' ? '#3B82F6' : '#9CA3AF'} />
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => setViewMode('gallery')}
-                    className={`p-2 rounded-md ${viewMode === 'gallery' ? 'bg-white shadow-sm' : ''}`}
+                    style={{
+                        padding: 8,
+                        borderRadius: 6,
+                        backgroundColor: viewMode === 'gallery' ? 'white' : 'transparent',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: viewMode === 'gallery' ? 0.05 : 0,
+                        shadowRadius: 1,
+                        elevation: viewMode === 'gallery' ? 1 : 0
+                    }}
                 >
                     <Ionicons name="images" size={20} color={viewMode === 'gallery' ? '#3B82F6' : '#9CA3AF'} />
                 </TouchableOpacity>
