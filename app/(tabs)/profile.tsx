@@ -163,8 +163,18 @@ export default function ProfileScreen() {
             <ScrollView className="flex-1 px-6">
 
                 {/* Couple Card */}
-                <View className="bg-white p-6 rounded-3xl shadow-card mb-6">
-                    <View className="flex-row items-center justify-between px-4">
+                <View className="bg-white p-6 rounded-3xl shadow-sm shadow-blue-100/40 border border-gray-50 mb-6">
+                    <View className="flex-row items-center justify-between mb-6">
+                        <View className="flex-row items-center">
+                            <View className="w-10 h-10 bg-blue-50 rounded-full items-center justify-center mr-3">
+                                <Ionicons name="people" size={20} color="#3B82F6" />
+                            </View>
+                            <Text className="text-gray-900 font-extrabold font-sans text-xl">Our Connection</Text>
+                        </View>
+                    </View>
+                    <View className="h-[1px] bg-gray-100 mb-6" />
+
+                    <View className="flex-row items-center justify-between px-2">
                         {/* Me */}
                         <View className="items-center">
                             <TouchableOpacity onPress={pickProfileImage} className="relative">
@@ -210,10 +220,10 @@ export default function ProfileScreen() {
                     </View>
 
                     {/* Couple ID */}
-                    <View className="mt-6 flex-row items-center justify-center">
-                        <View className="bg-blue-50 px-4 py-2 rounded-xl flex-row items-center">
-                            <Ionicons name="sparkles" size={14} color="#3B82F6" />
-                            <Text className="ml-2 text-blue-600 font-sans text-xs font-bold">
+                    <View className="mt-8 flex-row items-center justify-center">
+                        <View className="bg-blue-50/50 px-5 py-3 rounded-2xl flex-row items-center border border-blue-100">
+                            <Ionicons name="sparkles" size={16} color="#3B82F6" />
+                            <Text className="ml-2 text-blue-600 font-sans text-sm font-bold">
                                 {coupleId ? `Couple ID: ${coupleId.substring(0, 8)}` : 'No Couple ID'}
                             </Text>
                         </View>
@@ -221,12 +231,20 @@ export default function ProfileScreen() {
                 </View>
 
                 {/* Anniversary Section */}
-                <View className="bg-white p-6 rounded-3xl shadow-card mb-6">
-                    <Text className="text-gray-900 font-bold font-sans text-lg mb-4">First Met</Text>
+                <View className="bg-white p-6 rounded-3xl shadow-sm shadow-blue-100/40 border border-gray-50 mb-6">
+                    <View className="flex-row items-center justify-between mb-4">
+                        <View className="flex-row items-center">
+                            <View className="w-10 h-10 bg-pink-50 rounded-full items-center justify-center mr-3">
+                                <Ionicons name="calendar" size={20} color="#3B82F6" />
+                            </View>
+                            <Text className="text-gray-900 font-extrabold font-sans text-xl">First Met</Text>
+                        </View>
+                    </View>
+                    <View className="h-[1px] bg-gray-100 mb-4" />
 
                     <TouchableOpacity
                         onPress={() => setShowDatePicker(!showDatePicker)}
-                        className="flex-row items-center justify-between bg-gray-50 p-4 rounded-2xl border border-gray-100"
+                        className="flex-row items-center justify-between bg-white p-4 rounded-2xl border border-gray-100 shadow-sm shadow-gray-100/50"
                     >
                         <View className="flex-row items-center">
                             <View className="w-10 h-10 bg-pink-50 rounded-full items-center justify-center mr-3">
@@ -269,18 +287,27 @@ export default function ProfileScreen() {
                 </View>
 
                 {/* Settings / Actions */}
-                <View className="bg-white rounded-3xl shadow-card overflow-hidden mb-8">
-                    <View className="p-5 border-b border-gray-50 bg-gray-50">
-                        <Text className="text-gray-500 font-bold text-xs uppercase tracking-wider">Account</Text>
+                <View className="bg-white p-6 rounded-3xl shadow-sm shadow-blue-100/40 border border-gray-50 mb-8">
+                    <View className="flex-row items-center justify-between mb-4">
+                        <View className="flex-row items-center">
+                            <View className="w-10 h-10 bg-purple-50 rounded-full items-center justify-center mr-3">
+                                <Ionicons name="settings" size={20} color="#3B82F6" />
+                            </View>
+                            <Text className="text-gray-900 font-extrabold font-sans text-xl">Account</Text>
+                        </View>
                     </View>
-                    <View className="p-5">
-                        <Text className="text-gray-900 font-medium text-base mb-1">{user?.email}</Text>
-                        <Text className="text-gray-400 text-sm">Signed in via Google</Text>
+                    <View className="h-[1px] bg-gray-100 mb-4" />
+                    <View className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm shadow-gray-100/50 mb-4">
+                        <Text className="text-gray-900 font-bold font-sans text-base mb-1">{user?.email}</Text>
+                        <View className="flex-row items-center">
+                            <Ionicons name="logo-google" size={14} color="#6B7280" style={{ marginRight: 6 }} />
+                            <Text className="text-gray-500 font-medium font-sans text-sm">Signed in via Google</Text>
+                        </View>
                     </View>
 
                     <TouchableOpacity
                         onPress={handleSignOut}
-                        className="flex-row items-center justify-between p-5 border-t border-gray-50"
+                        className="flex-row items-center justify-between bg-red-50 p-4 rounded-2xl border border-red-100"
                     >
                         <View className="flex-row items-center">
                             <View className="w-8 h-8 bg-red-50 rounded-full items-center justify-center mr-3">

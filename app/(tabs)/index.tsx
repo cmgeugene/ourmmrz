@@ -132,56 +132,80 @@ export default function HomeScreen() {
 
             {/* Recent Tasks Preview */}
             <View className="px-6 mb-6">
-                <View className="flex-row justify-between items-center mb-4">
-                    <Text className="text-gray-900 font-bold text-lg font-sans">Tasks</Text>
-                    <TouchableOpacity onPress={() => router.push('/(tabs)/tasks')}>
-                        <Text className="text-blue-500 font-medium font-sans">See all</Text>
-                    </TouchableOpacity>
-                </View>
-
                 {loadingStats ? (
-                    <View className="bg-white p-4 rounded-2xl shadow-sm">
-                        <ActivityIndicator />
+                    <View className="bg-white p-6 rounded-3xl shadow-sm border border-gray-50 h-[180px] justify-center">
+                        <ActivityIndicator color="#3B82F6" />
                     </View>
                 ) : tasks.length > 0 ? (
-                    <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                        {tasks.slice(0, 3).map((task, index) => (
-                            <View key={task.id}>
-                                <TouchableOpacity
-                                    onPress={() => router.push('/(tabs)/tasks')}
-                                    className="flex-row items-center p-4"
-                                >
-                                    <Ionicons
-                                        name={task.completed ? "checkbox" : "square-outline"}
-                                        size={20}
-                                        color={task.completed ? "#9CA3AF" : "#3B82F6"}
-                                    />
-                                    <Text
-                                        numberOfLines={1}
-                                        className={`flex-1 ml-3 font-sans ${task.completed ? 'text-gray-400 line-through' : 'text-gray-800'}`}
-                                    >
-                                        {task.text}
-                                    </Text>
-                                </TouchableOpacity>
-                                {index < Math.min(tasks.length, 3) - 1 && (
-                                    <View className="h-[1px] bg-gray-100 mx-4" />
-                                )}
+                    <View className="bg-white p-6 rounded-3xl shadow-sm shadow-blue-100/40 border border-gray-50">
+                        <View className="flex-row justify-between items-center mb-3">
+                            <View className="flex-row items-center">
+                                <View className="w-10 h-10 bg-green-50 rounded-full items-center justify-center mr-3">
+                                    <Ionicons name="checkbox" size={20} color="#3B82F6" />
+                                </View>
+                                <Text className="text-gray-900 font-extrabold text-xl font-sans">Tasks</Text>
                             </View>
-                        ))}
+                            <TouchableOpacity onPress={() => router.push('/(tabs)/tasks')}>
+                                <Text className="text-blue-600 font-bold font-sans">See all</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View className="h-[1px] bg-gray-100 mb-3" />
+                        <View className="bg-white rounded-2xl overflow-hidden">
+                            {tasks.slice(0, 3).map((task, index) => (
+                                <View key={task.id}>
+                                    <TouchableOpacity
+                                        onPress={() => router.push('/(tabs)/tasks')}
+                                        className="flex-row items-center py-4"
+                                    >
+                                        <View className={`w-6 h-6 rounded-full border-2 items-center justify-center mr-3 ${task.completed ? 'bg-gray-100 border-gray-200' : 'border-blue-500 bg-blue-50/30'}`}>
+                                            {task.completed && <Ionicons name="checkmark" size={14} color="#9CA3AF" />}
+                                        </View>
+                                        <Text
+                                            numberOfLines={1}
+                                            className={`flex-1 font-sans text-base ${task.completed ? 'text-gray-400 line-through' : 'text-gray-800 font-medium'}`}
+                                        >
+                                            {task.text}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    {index < Math.min(tasks.length, 3) - 1 && (
+                                        <View className="h-[1px] bg-gray-50" />
+                                    )}
+                                </View>
+                            ))}
+                        </View>
                     </View>
                 ) : (
-                    <View className="bg-white p-6 rounded-2xl shadow-sm items-center">
-                        <Text className="text-gray-400 font-sans mb-2">No tasks yet</Text>
-                        <TouchableOpacity onPress={() => router.push('/(tabs)/tasks')}>
-                            <Text className="text-blue-500 font-medium font-sans">Add a task</Text>
-                        </TouchableOpacity>
+                    <View className="bg-white p-6 rounded-3xl shadow-sm shadow-blue-100/40 border border-gray-50">
+                        <View className="flex-row justify-between items-center mb-3">
+                            <View className="flex-row items-center">
+                                <View className="w-10 h-10 bg-green-50 rounded-full items-center justify-center mr-3">
+                                    <Ionicons name="checkbox" size={20} color="#10B981" />
+                                </View>
+                                <Text className="text-gray-900 font-extrabold text-xl font-sans">Tasks</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => router.push('/(tabs)/tasks')}>
+                                <Text className="text-blue-600 font-bold font-sans">See all</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View className="h-[1px] bg-gray-100 mb-4" />
+                        <View className="bg-blue-50/40 p-6 rounded-3xl border border-blue-50 items-center py-8">
+                            <View className="w-12 h-12 bg-white rounded-full items-center justify-center mb-3 shadow-sm shadow-blue-100/50">
+                                <Ionicons name="checkbox-outline" size={24} color="#9CA3AF" />
+                            </View>
+                            <Text className="text-gray-500 font-medium font-sans mb-3 text-center">No upcoming tasks</Text>
+                            <TouchableOpacity
+                                onPress={() => router.push('/(tabs)/tasks')}
+                                className="bg-white px-5 py-2.5 rounded-full shadow-sm shadow-blue-100/50 border border-blue-50"
+                            >
+                                <Text className="text-blue-600 font-bold font-sans">Add a task</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 )}
             </View>
 
             {/* Recent Memory Highlight */}
             <View className="px-6 mb-24">
-                <Text className="text-gray-900 font-bold text-lg mb-4 font-sans">Latest Memory</Text>
                 {events.length > 0 ? (
                     (() => {
                         // Get most recent event
@@ -202,43 +226,64 @@ export default function HomeScreen() {
                                         rating: latest.rating?.toString() || ''
                                     }
                                 })}
-                                className="bg-white p-4 rounded-3xl shadow-card"
+                                className="bg-white p-5 rounded-3xl shadow-sm shadow-blue-100 border border-gray-50"
                             >
+                                <View className="flex-row justify-between items-center mb-4">
+                                    <View className="flex-row items-center">
+                                        <View className="w-10 h-10 bg-pink-50 rounded-full items-center justify-center mr-3">
+                                            <Ionicons name="images" size={20} color="#3B82F6" />
+                                        </View>
+                                        <Text className="text-gray-900 font-extrabold text-xl font-sans">Latest Memory</Text>
+                                    </View>
+                                </View>
+                                <View className="h-[1px] bg-gray-100 mb-4" />
+
                                 {imageUrl && (
-                                    <Image
-                                        source={{ uri: imageUrl }}
-                                        className="w-full h-48 rounded-2xl mb-3"
-                                        resizeMode="cover"
-                                    />
+                                    <View className="relative">
+                                        <Image
+                                            source={{ uri: imageUrl }}
+                                            className="w-full h-56 rounded-2xl mb-4"
+                                            resizeMode="cover"
+                                        />
+                                        <View className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm">
+                                            <Text className="text-gray-900 font-bold text-xs tracking-wide">
+                                                {format(new Date(latest.event_date), 'MMM d, yyyy')}
+                                            </Text>
+                                        </View>
+                                    </View>
                                 )}
+
+                                {/* Card Content */}
                                 <View className="flex-row justify-between items-start">
-                                    <View className="flex-1 pr-2">
-                                        <Text className="text-gray-900 font-bold text-lg mb-1">
-                                            {format(new Date(latest.event_date), 'yy.M.d EEEE', { locale: ko })}
-                                        </Text>
+                                    <View className="flex-1 pr-3">
+                                        {!imageUrl && (
+                                            <Text className="text-blue-600 font-bold text-sm mb-2 tracking-wide uppercase">
+                                                {format(new Date(latest.event_date), 'yyyy.MM.dd')}
+                                            </Text>
+                                        )}
 
                                         {/* Location & Keywords Inline */}
-                                        <View className="flex-row flex-wrap items-center mb-2">
-                                            <Ionicons name="location-sharp" size={14} color="#6B7280" style={{ marginRight: 4 }} />
-                                            <Text className="text-gray-600 text-sm font-medium font-sans mr-2">
-                                                {latest.location || '어딘가에서'}
-                                            </Text>
+                                        <View className="flex-row flex-wrap items-center mt-1 mb-3">
+                                            <View className="flex-row items-center mr-3 bg-gray-50 px-2 py-1 rounded-lg">
+                                                <Ionicons name="location" size={12} color="#6B7280" style={{ marginRight: 4 }} />
+                                                <Text className="text-gray-700 text-xs font-bold font-sans">
+                                                    {latest.location || 'Unknown Location'}
+                                                </Text>
+                                            </View>
 
                                             {/* Star Rating Display */}
                                             {latest.rating && (
-                                                <View className="mr-2">
-                                                    <CompactStarRatingDisplay rating={latest.rating} size={12} color="#FBBF24" />
+                                                <View className="mr-3 bg-orange-50 px-2 py-1 rounded-lg flex-row items-center">
+                                                    <CompactStarRatingDisplay rating={latest.rating} size={10} color="#F59E0B" />
                                                 </View>
                                             )}
 
-                                            {latest.keywords?.map((keyword, index) => (
-                                                <View key={index} className="mr-1.5 mb-1 bg-pink-50 px-1.5 py-0.5 rounded-md border border-pink-100">
-                                                    <Text className="text-pink-600 text-[10px] font-bold">#{keyword}</Text>
+                                            {latest.keywords?.slice(0, 3).map((keyword, index) => (
+                                                <View key={index} className="mr-1.5 mb-1.5 bg-blue-50/80 px-2 py-1 rounded-lg border border-blue-100/50">
+                                                    <Text className="text-blue-600 text-[10px] font-extrabold tracking-wide">#{keyword}</Text>
                                                 </View>
                                             ))}
                                         </View>
-
-
 
                                         {/* Description */}
                                         {latest.description && (
@@ -247,19 +292,36 @@ export default function HomeScreen() {
                                             </Text>
                                         )}
                                     </View>
-                                    <View className="mt-1">
-                                        <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+                                    <View className="w-10 h-10 bg-gray-50 rounded-full items-center justify-center -mr-1">
+                                        <Ionicons name="arrow-forward" size={18} color="#9CA3AF" />
                                     </View>
                                 </View>
                             </TouchableOpacity>
                         );
                     })()
                 ) : (
-                    <View className="bg-white p-6 rounded-3xl shadow-card items-center py-10">
-                        <Text className="text-gray-400 text-center">No memories yet.</Text>
-                        <TouchableOpacity onPress={() => router.push('/(tabs)/add')} className="mt-4">
-                            <Text className="text-primary font-bold">Create one now</Text>
-                        </TouchableOpacity>
+                    <View className="bg-white p-6 rounded-3xl shadow-sm shadow-blue-100 border border-gray-50">
+                        <View className="flex-row justify-between items-center mb-0">
+                            <View className="flex-row items-center">
+                                <View className="w-10 h-10 bg-pink-50 rounded-full items-center justify-center mr-3">
+                                    <Ionicons name="images" size={20} color="#EC4899" />
+                                </View>
+                                <Text className="text-gray-900 font-extrabold text-xl font-sans">Latest Memory</Text>
+                            </View>
+                        </View>
+                        <View className="h-[1px] bg-gray-100 mb-4" />
+                        <View className="bg-pink-50/40 p-6 rounded-3xl border border-pink-50 items-center py-10 shadow-sm shadow-pink-100/20">
+                            <View className="w-16 h-16 bg-white rounded-full items-center justify-center mb-4 shadow-sm shadow-pink-100/50">
+                                <Ionicons name="images-outline" size={32} color="#EC4899" />
+                            </View>
+                            <Text className="text-gray-500 font-medium font-sans mb-4 text-center">No memories created yet.</Text>
+                            <TouchableOpacity
+                                onPress={() => router.push('/(tabs)/add')}
+                                className="bg-white px-6 py-3 rounded-full shadow-sm shadow-pink-100/50 border border-pink-50"
+                            >
+                                <Text className="text-pink-600 font-bold font-sans">Create your first memory</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 )}
             </View>

@@ -18,7 +18,7 @@ interface StatsSummaryProps {
 export default function StatsSummary({ stats, loading }: StatsSummaryProps) {
     if (loading) {
         return (
-            <View className="bg-white p-6 rounded-3xl shadow-sm border border-gray-50 items-center justify-center h-48 mb-6 mx-6">
+            <View className="bg-white p-6 rounded-3xl shadow-sm shadow-blue-100 border border-gray-50 items-center justify-center h-48 mb-6 mx-6">
                 <ActivityIndicator color="#3B82F6" />
             </View>
         );
@@ -32,69 +32,76 @@ export default function StatsSummary({ stats, loading }: StatsSummaryProps) {
     }
 
     return (
-        <View className="bg-white p-5 rounded-3xl shadow-sm border border-gray-50 mb-6 mx-6">
+        <View className="bg-white p-6 rounded-3xl shadow-sm shadow-blue-100 border border-gray-50 mb-6 mx-6">
             <View className="flex-row items-center mb-4">
-                <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-                    <Ionicons name="stats-chart" size={16} color="#3B82F6" />
+                <View className="w-10 h-10 bg-blue-50 rounded-full items-center justify-center mr-3">
+                    <Ionicons name="stats-chart" size={20} color="#3B82F6" />
                 </View>
-                <Text className="text-gray-900 font-bold font-sans text-lg">Our Stats</Text>
+                <Text className="text-gray-900 font-extrabold font-sans text-xl">Our Stats</Text>
             </View>
+            <View className="h-[1px] bg-gray-100 mb-4" />
 
             {/* Total Memories */}
             <View className="flex-row items-baseline mb-6">
-                <Text className="text-4xl font-bold text-gray-900 font-sans mr-2">
+                <Text className="text-5xl font-extrabold text-blue-600 font-sans mr-2 tracking-tight">
                     {stats.total_memories}
                 </Text>
-                <Text className="text-gray-500 font-sans text-base">memories collected</Text>
+                <Text className="text-gray-500 font-sans text-base font-medium">memories collected</Text>
             </View>
 
             <View className="flex-row gap-4">
                 {/* Top Place */}
-                <View className="flex-1 bg-gray-50 p-3 rounded-2xl">
-                    <Text className="text-gray-500 text-xs font-bold uppercase mb-2">Most Visited</Text>
+                <View className="flex-1 bg-blue-50/60 p-4 rounded-3xl border border-blue-100/50">
+                    <View className="flex-row items-center mb-2">
+                        <Ionicons name="location" size={14} color="#3B82F6" style={{ marginRight: 6 }} />
+                        <Text className="text-blue-600/80 text-xs font-extrabold uppercase tracking-wider">Most Visited</Text>
+                    </View>
                     {stats.top_places.length > 0 ? (
                         <View>
-                            <Text className="text-gray-900 font-bold text-base mb-1" numberOfLines={1}>
+                            <Text className="text-gray-900 font-extrabold text-base mb-2" numberOfLines={1}>
                                 {stats.top_places[0].location}
                             </Text>
-                            <View className="bg-white self-start px-2 py-0.5 rounded-md border border-gray-100">
-                                <Text className="text-blue-500 text-xs font-bold">
+                            <View className="bg-white/80 self-start px-2.5 py-1 rounded-lg border border-blue-50 shadow-sm shadow-blue-100/20">
+                                <Text className="text-blue-600 text-xs font-bold">
                                     {stats.top_places[0].count} visits
                                 </Text>
                             </View>
                         </View>
                     ) : (
-                        <Text className="text-gray-400 text-sm italic">Not enough data</Text>
+                        <Text className="text-gray-400 text-sm italic mt-1">Not enough data</Text>
                     )}
                 </View>
 
                 {/* Top Category */}
-                <View className="flex-1 bg-gray-50 p-3 rounded-2xl">
-                    <Text className="text-gray-500 text-xs font-bold uppercase mb-2">Favorite Vibe</Text>
+                <View className="flex-1 bg-pink-50/60 p-4 rounded-3xl border border-pink-100/50">
+                    <View className="flex-row items-center mb-2">
+                        <Ionicons name="heart" size={14} color="#EC4899" style={{ marginRight: 6 }} />
+                        <Text className="text-pink-600/80 text-xs font-extrabold uppercase tracking-wider">Favorite Vibe</Text>
+                    </View>
                     {stats.top_categories.length > 0 ? (
                         <View>
-                            <View className="flex-row items-center mb-1">
+                            <View className="flex-row items-center mb-2">
                                 {(() => {
                                     const catId = stats.top_categories[0].category;
                                     const category = PLACE_CATEGORIES.find(c => c.id === catId);
                                     return (
                                         <>
-                                            <Ionicons name={category?.icon as any || 'star'} size={16} color="#EC4899" style={{ marginRight: 4 }} />
-                                            <Text className="text-gray-900 font-bold text-base" numberOfLines={1}>
+                                            <Ionicons name={category?.icon as any || 'star'} size={16} color="#EC4899" style={{ marginRight: 6 }} />
+                                            <Text className="text-gray-900 font-extrabold text-base" numberOfLines={1}>
                                                 {category?.label || catId}
                                             </Text>
                                         </>
                                     );
                                 })()}
                             </View>
-                            <View className="bg-white self-start px-2 py-0.5 rounded-md border border-gray-100">
-                                <Text className="text-pink-500 text-xs font-bold">
+                            <View className="bg-white/80 self-start px-2.5 py-1 rounded-lg border border-pink-50 shadow-sm shadow-pink-100/20">
+                                <Text className="text-pink-600 text-xs font-bold">
                                     {stats.top_categories[0].count} times
                                 </Text>
                             </View>
                         </View>
                     ) : (
-                        <Text className="text-gray-400 text-sm italic">Not enough data</Text>
+                        <Text className="text-gray-400 text-sm italic mt-1">Not enough data</Text>
                     )}
                 </View>
             </View>
