@@ -247,7 +247,7 @@ export default function MomentsScreen() {
     };
 
     const renderHeader = () => (
-        <View className="pt-14 pb-4 px-6 bg-white flex-row justify-between items-center shadow-sm z-10 mb-2">
+        <View className="pt-14 pb-5 px-6 bg-white flex-row justify-between items-center shadow-sm z-10 mb-4 rounded-b-3xl">
             <Text className="text-2xl font-bold text-gray-900 font-sans tracking-tight">Moments</Text>
 
             <View className="flex-row bg-gray-100 rounded-lg p-0.5">

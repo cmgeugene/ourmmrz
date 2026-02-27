@@ -85,13 +85,15 @@ export default function TasksScreen() {
 
     return (
         <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "padding"}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
             keyboardVerticalOffset={Platform.OS === "ios" ? 85 : 0}
-            className="flex-1 bg-surface pt-14"
+            className="flex-1 bg-surface"
         >
-            <View className="px-6 mb-4 flex-row justify-between items-center">
-                <Text className="text-2xl font-bold text-gray-900 font-sans">Tasks</Text>
-                <Text className="text-gray-500 font-sans">{tasks.filter(t => t.completed).length}/{tasks.length}</Text>
+            <View className="pt-14 pb-6 px-6 bg-white shadow-sm z-10 mb-4 rounded-b-3xl flex-row justify-between items-center">
+                <Text className="text-2xl font-bold text-gray-900 font-sans tracking-tight">Tasks</Text>
+                <View className="bg-gray-100 px-3 py-1 rounded-full">
+                    <Text className="text-gray-600 font-bold font-sans text-sm">{tasks.filter(t => t.completed).length}/{tasks.length}</Text>
+                </View>
             </View>
 
             <FlatList

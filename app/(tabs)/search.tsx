@@ -142,57 +142,61 @@ export default function SearchScreen() {
     };
 
     return (
-        <View className="flex-1 bg-surface pt-14 px-6">
-            <Text className="text-2xl font-bold text-gray-900 font-sans mb-4">Search</Text>
+        <View className="flex-1 bg-surface">
+            <View className="pt-14 pb-6 px-6 bg-white shadow-sm z-10 mb-4 rounded-b-3xl">
+                <Text className="text-2xl font-bold text-gray-900 font-sans tracking-tight mb-4">Search</Text>
 
-            <View className="flex-row items-center bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 shadow-sm">
-                <Ionicons name="search" size={20} color="#9CA3AF" />
-                <TextInput
-                    className="flex-1 ml-2 text-base font-sans text-gray-900"
-                    placeholder="Search memories..."
-                    placeholderTextColor="#9CA3AF"
-                    value={searchText}
-                    onChangeText={setSearchText}
-                    autoCapitalize="none"
-                />
-                {searchText.length > 0 && (
-                    <TouchableOpacity onPress={() => setSearchText('')}>
-                        <Ionicons name="close-circle" size={18} color="#9CA3AF" />
-                    </TouchableOpacity>
-                )}
+                <View className="flex-row items-center bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 shadow-sm shadow-gray-100/50">
+                    <Ionicons name="search" size={20} color="#9CA3AF" />
+                    <TextInput
+                        className="flex-1 ml-2 text-base font-sans text-gray-900"
+                        placeholder="Search memories..."
+                        placeholderTextColor="#9CA3AF"
+                        value={searchText}
+                        onChangeText={setSearchText}
+                        autoCapitalize="none"
+                    />
+                    {searchText.length > 0 && (
+                        <TouchableOpacity onPress={() => setSearchText('')}>
+                            <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
 
-            {loading ? (
-                <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="small" color="#3B82F6" />
-                </View>
-            ) : searchText.length > 0 ? (
-                searching ? (
-                    <View className="mt-10 items-center">
-                        <ActivityIndicator size="small" color="#9CA3AF" />
+            <View className="flex-1 px-6">
+                {loading ? (
+                    <View className="flex-1 justify-center items-center">
+                        <ActivityIndicator size="small" color="#3B82F6" />
                     </View>
-                ) : filteredEvents.length > 0 ? (
-                    <FlatList
-                        data={filteredEvents}
-                        renderItem={renderItem}
-                        keyExtractor={item => item.id}
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ paddingBottom: 100 }}
-                    />
+                ) : searchText.length > 0 ? (
+                    searching ? (
+                        <View className="mt-10 items-center">
+                            <ActivityIndicator size="small" color="#9CA3AF" />
+                        </View>
+                    ) : filteredEvents.length > 0 ? (
+                        <FlatList
+                            data={filteredEvents}
+                            renderItem={renderItem}
+                            keyExtractor={item => item.id}
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={{ paddingBottom: 100 }}
+                        />
+                    ) : (
+                        <View className="mt-20 items-center">
+                            <Ionicons name="search-outline" size={48} color="#E5E7EB" />
+                            <Text className="text-gray-400 mt-4 font-sans text-lg">No matches found</Text>
+                            <Text className="text-gray-400 text-sm font-sans mt-1">Try different keywords or filters</Text>
+                        </View>
+                    )
                 ) : (
-                    <View className="mt-20 items-center">
-                        <Ionicons name="search-outline" size={48} color="#E5E7EB" />
-                        <Text className="text-gray-400 mt-4 font-sans text-lg">No matches found</Text>
-                        <Text className="text-gray-400 text-sm font-sans mt-1">Try different keywords or filters</Text>
+                    <View className="flex-1 justify-center items-center opacity-50">
+                        <Ionicons name="search" size={64} color="#E5E7EB" />
+                        <Text className="text-gray-400 mt-4 font-sans">Enter a keyword to search</Text>
+                        <Text className="text-gray-400 text-xs mt-2">Location, category, description, tags...</Text>
                     </View>
-                )
-            ) : (
-                <View className="flex-1 justify-center items-center opacity-50">
-                    <Ionicons name="search" size={64} color="#E5E7EB" />
-                    <Text className="text-gray-400 mt-4 font-sans">Enter a keyword to search</Text>
-                    <Text className="text-gray-400 text-xs mt-2">Location, category, description, tags...</Text>
-                </View>
-            )}
+                )}
+            </View>
         </View>
     );
 }
